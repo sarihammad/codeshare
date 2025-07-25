@@ -4,16 +4,17 @@ import React from 'react';
 import Link from 'next/link';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
-import { logout } from '@/store/authSlice';
+import { logoutThunk } from '@/store/authSlice';
 import { useRouter } from 'next/navigation';
 
 const Navbar: React.FC = () => {
-  const { token } = useSelector((state: RootState) => state.auth);
+  const auth = useSelector((state: RootState) => state.auth);
+  const isAuthenticated = auth.isAuthenticated;
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    await dispatch(logoutThunk()).unwrap();
     router.push('/login');
   };
 
@@ -23,7 +24,7 @@ const Navbar: React.FC = () => {
         CodeShare
       </Link>
       <div className="flex items-center gap-4">
-        {token ? (
+        {isAuthenticated ? (
           <>
             <Link href="/dashboard" className="hover:text-red-600">
               Dashboard
