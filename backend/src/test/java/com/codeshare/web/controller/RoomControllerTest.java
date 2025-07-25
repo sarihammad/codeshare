@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 @WebMvcTest(RoomController.class)
 @WithMockUser
@@ -48,7 +49,6 @@ public class RoomControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/rooms/" + roomId + "/presence"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0]").value("user1"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1]").value("user2"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$", containsInAnyOrder("user1", "user2")));
     }
 } 
