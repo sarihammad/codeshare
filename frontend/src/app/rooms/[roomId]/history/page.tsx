@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { diffLines, Change } from 'diff';
@@ -17,7 +15,6 @@ interface Snapshot {
 
 const HistoryPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { token } = useSelector((state: RootState) => state.auth);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,9 +30,7 @@ const HistoryPage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await apiCall(API_ENDPOINTS.ROOMS.HISTORY(roomId), {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiCall(API_ENDPOINTS.ROOMS.HISTORY(roomId));
         if (!res.ok) throw new Error('Failed to fetch history');
         const data = await res.json();
         setSnapshots(data.map((key: string) => ({ key })));
@@ -45,18 +40,15 @@ const HistoryPage: React.FC = () => {
         setLoading(false);
       }
     };
-    if (token && roomId) fetchHistory();
-  }, [token, roomId]);
+    if (roomId) fetchHistory();
+  }, [roomId]);
 
   const handleDownload = async (key: string) => {
     try {
       const res = await fetch(
         `${buildApiUrl(
           API_ENDPOINTS.ROOMS.SNAPSHOT(roomId)
-        )}?key=${encodeURIComponent(key)}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        )}?key=${encodeURIComponent(key)}`
       );
       if (!res.ok) throw new Error('Failed to download snapshot');
       const blob = await res.blob();
@@ -90,18 +82,12 @@ const HistoryPage: React.FC = () => {
         fetch(
           `${buildApiUrl(
             API_ENDPOINTS.ROOMS.SNAPSHOT(roomId)
-          )}?key=${encodeURIComponent(selected[0])}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          )}?key=${encodeURIComponent(selected[0])}`
         ),
         fetch(
           `${buildApiUrl(
             API_ENDPOINTS.ROOMS.SNAPSHOT(roomId)
-          )}?key=${encodeURIComponent(selected[1])}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          )}?key=${encodeURIComponent(selected[1])}`
         ),
       ]);
       if (!res1.ok || !res2.ok)
