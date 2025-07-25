@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from '../../../components/ProtectedRoute';
 import dynamic from 'next/dynamic';
-import UserList from '@/components/UserList';
-import EditorSkeleton from '@/components/EditorSkeleton';
+import UserList from '../../../components/UserList';
+import EditorSkeleton from '../../../components/EditorSkeleton';
 import { apiCall, API_ENDPOINTS } from '@/config/api';
 
 const MonacoEditor = dynamic(() => import('@/components/MonacoEditor'), {
