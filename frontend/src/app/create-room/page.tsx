@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
-import ProtectedRoute from '../../components/ProtectedRoute';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { apiCall, API_ENDPOINTS } from '@/config/api';
 import { motion } from 'framer-motion';
 

@@ -3,8 +3,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
 import { motion } from 'framer-motion';
 
 const features = [
@@ -61,13 +59,10 @@ const stats = [
 
 export default function LandingPage() {
   const router = useRouter();
-  const { token } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    if (token) {
-      router.replace('/dashboard');
-    }
-  }, [token, router]);
+    router.replace('/dashboard');
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
