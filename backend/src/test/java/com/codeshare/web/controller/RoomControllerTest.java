@@ -2,6 +2,7 @@ package com.codeshare.web.controller;
 
 import com.codeshare.infrastructure.redis.PresenceService;
 import com.codeshare.domain.room.service.RoomService;
+import com.codeshare.infrastructure.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -28,6 +29,9 @@ public class RoomControllerTest {
 
     @MockBean
     private PresenceService presenceService;
+
+    @MockBean
+    private JwtService jwtService;
 
     @BeforeEach
     void setUp() {
