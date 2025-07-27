@@ -36,7 +36,7 @@ graph TD
 
 ## System Overview
 
-Real-time collaborative code editing is enabled using Yjs, a CRDT-based library that merges changes without central coordination. The frontend communicates with the backend through WebSocket connections for live sync and user presence updates. User presence is tracked using Redis and broadcast to all connected clients in a room. Room creation, joining, and history are handled through REST API endpoints. To maintain a version history, code snapshots are periodically stored in S3. Editor events are streamed using Kafka, allowing for scalable event processing. All room and user metadata is stored in a PostgreSQL database.
+Real-time collaborative code editing is enabled using Yjs, a CRDT-based library that merges changes without central coordination. The frontend communicates with the backend through WebSocket connections for live sync and user presence updates. User presence is tracked using Redis and broadcast to all connected clients in a room. Room creation, joining, and history are handled through REST API endpoints. To maintain a version history, code snapshots are periodically stored in S3. Editor events are streamed using Kafka, allowing for scalable event processing. All room and user metadata is stored in AWS RDS. Deployed on AWS Fargate.
 
 ---
 
@@ -59,5 +59,5 @@ Real-time collaborative code editing is enabled using Yjs, a CRDT-based library 
 ## Tech Stack
 
 - **Frontend:** Next.js, React, Redux Toolkit, Tailwind CSS, Monaco Editor, Yjs, y-monaco, y-websocket
-- **Backend:** Spring Boot, WebSocket, Kafka, Redis, S3, Postgres
+- **Backend:** Spring Boot, WebSocket, Kafka, Redis, AWS S3, AWS RDS, AWS Fargate
 - **DevOps:** Docker, Docker Compose, Prometheus, Grafana
