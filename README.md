@@ -1,8 +1,6 @@
 # CodeShare
 
-A real-time collaborative code editor designed for teams and individuals. It enables seamless multi-user editing with live cursor sharing, in-room chat, and room management. Built for performance and scalability, CodeShare supports version history, presence tracking, and a modern developer experience.
-
-Note: Highly overengineered. Kafka and event-streaming is unnecessary at this scale and only used as a learning experience.
+A real-time collaborative code editor. Enables multi-user editing with live cursor sharing, in-room chat, and room management. Built for performance and scalability.
 
 ---
 
