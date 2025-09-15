@@ -17,10 +17,11 @@ This guide provides operational procedures for running, monitoring, and maintain
 ### Initial Deployment
 
 1. **Environment Setup**
+
    ```bash
    # Copy environment template
    cp .env.example .env
-   
+
    # Configure required variables
    export JWT_SECRET="$(openssl rand -base64 32)"
    export DB_PASSWORD="$(openssl rand -base64 16)"
@@ -29,22 +30,24 @@ This guide provides operational procedures for running, monitoring, and maintain
    ```
 
 2. **Database Initialization**
+
    ```bash
    # Start database services
    docker compose up -d postgres redis kafka
-   
+
    # Wait for services to be healthy
    docker compose ps
-   
+
    # Verify database connection
    docker compose exec postgres psql -U postgres -d codeshare -c "SELECT version();"
    ```
 
 3. **Application Deployment**
+
    ```bash
    # Build and start all services
    docker compose up --build -d
-   
+
    # Verify all services are running
    docker compose ps
    ```
@@ -52,25 +55,27 @@ This guide provides operational procedures for running, monitoring, and maintain
 ### Rolling Updates
 
 1. **Backend Updates**
+
    ```bash
    # Build new backend image
    docker compose build backend
-   
+
    # Rolling update with zero downtime
    docker compose up -d --no-deps backend
-   
+
    # Verify health
    curl http://localhost:8080/actuator/health
    ```
 
 2. **Frontend Updates**
+
    ```bash
    # Build new frontend image
    docker compose build frontend
-   
+
    # Update frontend
    docker compose up -d --no-deps frontend
-   
+
    # Verify deployment
    curl http://localhost:3000
    ```
@@ -87,12 +92,14 @@ This guide provides operational procedures for running, monitoring, and maintain
 ### Key Metrics to Monitor
 
 #### Application Metrics
+
 - `codeshare.rooms.active` - Number of active rooms
 - `codeshare.websocket.connections.active` - Active WebSocket connections
 - `codeshare.snapshots.written` - Total snapshots written
 - `codeshare.rooms.created` - Total rooms created
 
 #### System Metrics
+
 - `jvm.memory.used` - JVM memory usage
 - `http.server.requests` - HTTP request metrics
 - `hikaricp.connections.active` - Database connection pool
@@ -112,7 +119,7 @@ groups:
           severity: critical
         annotations:
           summary: "High error rate detected"
-          
+
       - alert: HighMemoryUsage
         expr: jvm_memory_used_bytes / jvm_memory_max_bytes > 0.8
         for: 5m
@@ -120,7 +127,7 @@ groups:
           severity: warning
         annotations:
           summary: "High memory usage detected"
-          
+
       - alert: DatabaseConnectionPoolExhausted
         expr: hikaricp_connections_active / hikaricp_connections_max > 0.9
         for: 1m
@@ -155,52 +162,68 @@ docker compose logs backend > backend.log
 ### Common Issues and Solutions
 
 #### 1. WebSocket Connection Issues
+
 **Symptoms**: Users can't connect to collaborative editing
 **Diagnosis**:
+
 ```bash
 # Check WebSocket endpoint
 curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" \
   -H "Sec-WebSocket-Key: test" -H "Sec-WebSocket-Version: 13" \
   http://localhost:8080/ws/editor
 ```
+
 **Solutions**:
+
 - Verify CORS configuration
 - Check firewall rules
 - Ensure WebSocket proxy configuration
 
 #### 2. Database Connection Issues
+
 **Symptoms**: Application fails to start or database errors
 **Diagnosis**:
+
 ```bash
 # Check database connectivity
 docker compose exec backend ./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=test"
 ```
+
 **Solutions**:
+
 - Verify database credentials
 - Check network connectivity
 - Ensure database is running and accessible
 
 #### 3. High Memory Usage
+
 **Symptoms**: Application becomes slow or crashes
 **Diagnosis**:
+
 ```bash
 # Check memory usage
 docker stats
 curl http://localhost:8080/actuator/metrics/jvm.memory.used
 ```
+
 **Solutions**:
+
 - Increase container memory limits
 - Optimize JVM settings
 - Check for memory leaks
 
 #### 4. Redis Connection Issues
+
 **Symptoms**: Presence tracking not working
 **Diagnosis**:
+
 ```bash
 # Test Redis connectivity
 docker compose exec redis redis-cli ping
 ```
+
 **Solutions**:
+
 - Verify Redis configuration
 - Check network connectivity
 - Restart Redis service
@@ -308,7 +331,7 @@ docker compose logs backend | grep -i "authentication"
 
 ```yaml
 # docker-compose.scale.yml
-version: '3.8'
+version: "3.8"
 services:
   backend:
     deploy:
@@ -338,13 +361,13 @@ upstream frontend {
 server {
     listen 80;
     server_name your-domain.com;
-    
+
     location /api/ {
         proxy_pass http://backend;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
-    
+
     location /ws/ {
         proxy_pass http://backend;
         proxy_http_version 1.1;
@@ -352,7 +375,7 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
     }
-    
+
     location / {
         proxy_pass http://frontend;
         proxy_set_header Host $host;
@@ -366,16 +389,19 @@ server {
 ### Regular Maintenance Tasks
 
 #### Daily
+
 - Monitor application health and metrics
 - Check error logs for issues
 - Verify backup completion
 
 #### Weekly
+
 - Review performance metrics
 - Update security patches
 - Clean up old logs and temporary files
 
 #### Monthly
+
 - Database maintenance and optimization
 - Security audit and vulnerability scan
 - Capacity planning review
@@ -401,16 +427,19 @@ docker compose exec backend ./mvnw flyway:migrate
 ### Incident Response
 
 1. **Immediate Response**
+
    - Assess impact and severity
    - Notify stakeholders
    - Document incident details
 
 2. **Investigation**
+
    - Check logs and metrics
    - Identify root cause
    - Implement temporary fix if needed
 
 3. **Resolution**
+
    - Apply permanent fix
    - Verify system stability
    - Update monitoring and alerting
@@ -439,3 +468,4 @@ docker compose exec postgres psql -U postgres -d codeshare -c \
 - **Database Administrator**: [Contact Details]
 - **Security Team**: [Contact Details]
 - **Escalation Path**: [Contact Details]
+
