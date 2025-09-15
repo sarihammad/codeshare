@@ -8,6 +8,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import jakarta.annotation.PreDestroy;
 
 @Component
 public class YjsWebSocketHandler extends TextWebSocketHandler {
@@ -85,5 +86,23 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
         }
         
         return null;
+    }
+
+    @PreDestroy
+    public void cleanup() {
+        // Close all WebSocket sessions gracefully
+        roomSessions.values().forEach(sessions -> 
+            sessions.forEach(session -> {
+                try {
+                    if (session.isOpen()) {
+                        session.close(CloseStatus.SERVER_ERROR);
+                    }
+                } catch (Exception e) {
+                    logger.warn("Error closing WebSocket session: {}", e.getMessage());
+                }
+            })
+        );
+        roomSessions.clear();
+        logger.info("YjsWebSocketHandler cleanup completed");
     }
 } 

@@ -13,6 +13,7 @@ import com.codeshare.infrastructure.redis.PresenceService;
 import com.codeshare.infrastructure.security.JwtService;
 
 import java.util.*;
+import jakarta.annotation.PreDestroy;
 
 @Component
 public class EditorRoomHandler extends TextWebSocketHandler {
@@ -116,5 +117,22 @@ public class EditorRoomHandler extends TextWebSocketHandler {
                         .map(pair -> pair[1])
                         .findFirst()
                 ).orElse(null);
+    }
+
+    @PreDestroy
+    public void cleanup() {
+        // Close all WebSocket sessions gracefully
+        roomSessions.values().forEach(sessions -> 
+            sessions.forEach(session -> {
+                try {
+                    if (session.isOpen()) {
+                        session.close(CloseStatus.SERVER_ERROR);
+                    }
+                } catch (Exception e) {
+                    // Log but don't throw
+                }
+            })
+        );
+        roomSessions.clear();
     }
 }
