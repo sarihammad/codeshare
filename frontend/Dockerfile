@@ -1,21 +1,20 @@
 # Install dependencies only when needed
-FROM node:18-alpine AS deps
+FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps --only=production && npm cache clean --force
+RUN npm ci --legacy-peer-deps --omit=dev --ignore-scripts && npm cache clean --force
 
 # Build the app
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
 
 # Build the application
 RUN npm run build
 
 # Production image
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
