@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/rooms")
+@Validated
 public class RoomController {
     private static final Logger logger = LoggerFactory.getLogger(RoomController.class);
     
@@ -109,7 +111,7 @@ public class RoomController {
     }
 
     @PostMapping("/{id}/snapshot")
-    public ResponseEntity<SnapshotResponse> saveRoomSnapshot(@PathVariable UUID id, @RequestBody SnapshotRequest request) {
+    public ResponseEntity<SnapshotResponse> saveRoomSnapshot(@PathVariable UUID id, @Valid @RequestBody SnapshotRequest request) {
         try {
             if (request.content() == null) {
                 logger.warn("Received null content for room snapshot: {}", id);

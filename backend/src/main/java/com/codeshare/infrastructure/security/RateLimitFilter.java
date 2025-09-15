@@ -29,7 +29,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     
     // Rate limits for different endpoints
-    private static final Bandwidth AUTH_LIMIT = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(1)));
+    private static final Bandwidth AUTH_LIMIT = Bandwidth.classic(10, Refill.intervally(10, Duration.ofMinutes(1)));
+    private static final Bandwidth ROOM_MUTATION_LIMIT = Bandwidth.classic(60, Refill.intervally(60, Duration.ofMinutes(1)));
     private static final Bandwidth GENERAL_LIMIT = Bandwidth.classic(100, Refill.intervally(100, Duration.ofMinutes(1)));
     
     @Override
@@ -62,6 +63,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private Bandwidth getRateLimit(String requestPath) {
         if (requestPath.startsWith("/api/auth/")) {
             return AUTH_LIMIT;
+        }
+        if (requestPath.startsWith("/api/rooms/") && 
+            (requestPath.contains("POST") || requestPath.contains("PUT") || requestPath.contains("DELETE"))) {
+            return ROOM_MUTATION_LIMIT;
         }
         return GENERAL_LIMIT;
     }
