@@ -71,3 +71,4 @@
     <!-- Metrics logging -->
     <logger name="io.micrometer" level="INFO"/>
 </configuration>
+
