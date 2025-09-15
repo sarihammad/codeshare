@@ -1,10 +1,10 @@
 package com.codeshare.domain.user;
 
 import jakarta.persistence.*;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -13,22 +13,20 @@ import java.util.UUID;
 @AllArgsConstructor
 public class User {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
+  @Id @GeneratedValue private UUID id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+  @Column(nullable = false, unique = true)
+  private String email;
 
-    @Column(nullable = false)
-    private String password;
+  @Column(nullable = false)
+  private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Role role;
 
-    public enum Role {
-        USER,
-        ADMIN
-    }
+  public enum Role {
+    USER,
+    ADMIN
+  }
 }

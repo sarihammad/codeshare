@@ -9,19 +9,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class EditorEventConsumer {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final EditorRoomHandler editorRoomHandler;
+  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final EditorRoomHandler editorRoomHandler;
 
-    public EditorEventConsumer(EditorRoomHandler editorRoomHandler) {
-        this.editorRoomHandler = editorRoomHandler;
-    }
+  public EditorEventConsumer(EditorRoomHandler editorRoomHandler) {
+    this.editorRoomHandler = editorRoomHandler;
+  }
 
-    @KafkaListener(topics = "editor-events", groupId = "codeshare-group")
-    public void consume(String message) {
-        try {
-            EditorMessage msg = objectMapper.readValue(message, EditorMessage.class);
-            editorRoomHandler.broadcastToRoom(msg.roomId(), message);
-        } catch (Exception ignored) {
-        }
+  @KafkaListener(topics = "editor-events", groupId = "codeshare-group")
+  public void consume(String message) {
+    try {
+      EditorMessage msg = objectMapper.readValue(message, EditorMessage.class);
+      editorRoomHandler.broadcastToRoom(msg.roomId(), message);
+    } catch (Exception ignored) {
     }
+  }
 }

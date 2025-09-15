@@ -34,14 +34,9 @@ jobs:
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.12.x
 
-      - name: Start application
-        run: |
-          cd frontend
-          npx serve@14.2.1 out -p 3000 &
-          sleep 10
-
       - name: Run Lighthouse CI
         run: |
+          cd frontend
           lhci autorun
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
