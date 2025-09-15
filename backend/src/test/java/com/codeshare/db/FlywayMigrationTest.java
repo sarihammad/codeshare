@@ -144,3 +144,4 @@ class FlywayMigrationTest {
                 "Rooms updated_at trigger should exist");
     }
 }
+

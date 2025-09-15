@@ -1,8 +1,8 @@
-import '@testing-library/jest-dom';
-import React from 'react';
+import "@testing-library/jest-dom";
+import React from "react";
 
 // Mock Next.js router
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter() {
     return {
       push: jest.fn(),
@@ -17,45 +17,48 @@ jest.mock('next/navigation', () => ({
     return new URLSearchParams();
   },
   usePathname() {
-    return '/';
+    return "/";
   },
 }));
 
 // Mock Monaco Editor
-jest.mock('@monaco-editor/react', () => ({
+jest.mock("@monaco-editor/react", () => ({
   default: ({ onMount, ...props }: any) => {
     const mockEditor = {
-      getValue: () => 'test content',
+      getValue: () => "test content",
       setValue: jest.fn(),
       addCommand: jest.fn(),
       getModel: () => ({
         setValue: jest.fn(),
       }),
     };
-    
+
     React.useEffect(() => {
       if (onMount) {
         onMount(mockEditor);
       }
     }, []);
-    
-    return React.createElement('div', { 'data-testid': 'monaco-editor', ...props });
+
+    return React.createElement("div", {
+      "data-testid": "monaco-editor",
+      ...props,
+    });
   },
 }));
 
 // Mock Yjs and WebSocket
-jest.mock('yjs', () => ({
+jest.mock("yjs", () => ({
   Doc: jest.fn().mockImplementation(() => ({
     getText: jest.fn(() => ({
       insert: jest.fn(),
       observe: jest.fn(),
-      toString: jest.fn(() => 'test content'),
+      toString: jest.fn(() => "test content"),
     })),
     destroy: jest.fn(),
   })),
 }));
 
-jest.mock('y-websocket', () => ({
+jest.mock("y-websocket", () => ({
   WebsocketProvider: jest.fn().mockImplementation(() => ({
     awareness: {
       setLocalStateField: jest.fn(),
@@ -67,7 +70,7 @@ jest.mock('y-websocket', () => ({
   })),
 }));
 
-jest.mock('y-monaco', () => ({
+jest.mock("y-monaco", () => ({
   MonacoBinding: jest.fn(),
 }));
 
