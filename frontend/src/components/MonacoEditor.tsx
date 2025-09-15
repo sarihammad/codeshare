@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Monaco from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import * as monaco from 'monaco-editor';
@@ -60,7 +60,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   }, [roomId]);
 
   // Auto-save function with better error handling and save state
-  const saveContent = async (content: string) => {
+  const saveContent = useCallback(async (content: string) => {
     if (!roomId || !content) return;
 
     try {
@@ -89,7 +89,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       // Reset to idle after 5 seconds on error
       setTimeout(() => setSaveState('idle'), 5000);
     }
-  };
+  }, [roomId, addToast]);
 
   // Manual save function for keyboard shortcut
   const forceSave = async () => {
@@ -177,7 +177,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       provider.destroy();
       ydoc.destroy();
     };
-  }, [roomId, userId, onAwarenessUpdate, initialContent]);
+  }, [roomId, userId, onAwarenessUpdate, initialContent, saveContent, addToast]);
 
   function handleEditorDidMount(editorInstance: editor.IStandaloneCodeEditor) {
     editorRef.current = editorInstance;

@@ -29,7 +29,7 @@ export default function ServerError() {
           Server Error
         </h2>
         <p className="text-gray-600 mb-6">
-          We're experiencing technical difficulties. Our team has been notified
+          We&apos;re experiencing technical difficulties. Our team has been notified
           and is working to fix the issue.
         </p>
 

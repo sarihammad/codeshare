@@ -4,12 +4,12 @@ export interface ErrorDetails {
   message: string;
   code?: string;
   status?: number;
-  details?: any;
+  details?: unknown;
 }
 
 export function notifyError(error: Error | ErrorDetails | string): void {
   let message: string;
-  let details: any = undefined;
+  let details: unknown = undefined;
 
   if (typeof error === "string") {
     message = error;
@@ -77,7 +77,7 @@ export function notifyInfo(message: string): void {
 }
 
 // Global error handler for unhandled fetch errors
-export function handleFetchError(error: any, context?: string): void {
+export function handleFetchError(error: unknown, context?: string): void {
   let message = "An unexpected error occurred";
 
   if (error instanceof Response) {
@@ -105,7 +105,7 @@ export function handleFetchError(error: any, context?: string): void {
     }
   } else if (error instanceof TypeError && error.message.includes("fetch")) {
     message = "Network error. Please check your connection.";
-  } else if (error?.message) {
+  } else if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
     message = error.message;
   }
 

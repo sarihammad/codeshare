@@ -36,7 +36,7 @@ const TestWrapper = ({
   store,
 }: {
   children: React.ReactNode;
-  store: any;
+  store: unknown;
 }) => (
   <Provider store={store}>
     <BrowserRouter>{children}</BrowserRouter>

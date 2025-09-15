@@ -23,7 +23,7 @@ jest.mock("next/navigation", () => ({
 
 // Mock Monaco Editor
 jest.mock("@monaco-editor/react", () => ({
-  default: ({ onMount, ...props }: any) => {
+  default: ({ onMount, ...props }: { onMount?: (editor: unknown) => void; [key: string]: unknown }) => {
     const mockEditor = {
       getValue: () => "test content",
       setValue: jest.fn(),
@@ -33,11 +33,10 @@ jest.mock("@monaco-editor/react", () => ({
       }),
     };
 
-    React.useEffect(() => {
-      if (onMount) {
-        onMount(mockEditor);
-      }
-    }, []);
+    // Call onMount immediately instead of using useEffect
+    if (onMount) {
+      onMount(mockEditor);
+    }
 
     return React.createElement("div", {
       "data-testid": "monaco-editor",
