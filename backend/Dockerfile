@@ -18,6 +18,9 @@ RUN ./mvnw clean package -DskipTests
 # Production stage
 FROM eclipse-temurin:21-jre-alpine AS production
 
+# Install wget for health checks
+RUN apk add --no-cache wget
+
 # Create non-root user
 RUN addgroup -g 1001 -S appgroup && \
     adduser -u 1001 -S appuser -G appgroup
