@@ -5,6 +5,7 @@ import {
   logout as logoutApi,
   checkAuth,
 } from "@/lib/auth";
+import { notifyError } from "@/lib/notify";
 
 interface User {
   id: string;
@@ -38,7 +39,7 @@ export const loginThunk = createAsyncThunk(
       console.log("Login successful");
       return { email };
     } catch (err) {
-      console.error("Login failed:", err);
+      notifyError(err as Error);
       return rejectWithValue((err as Error).message);
     }
   }
@@ -56,7 +57,7 @@ export const registerThunk = createAsyncThunk(
       console.log("Register successful");
       return { email };
     } catch (err) {
-      console.error("Register failed:", err);
+      notifyError(err as Error);
       return rejectWithValue((err as Error).message);
     }
   }
@@ -71,7 +72,7 @@ export const logoutThunk = createAsyncThunk(
       console.log("Logout successful");
       return true;
     } catch (err) {
-      console.error("Logout failed:", err);
+      notifyError(err as Error);
       return rejectWithValue((err as Error).message);
     }
   }
@@ -86,7 +87,7 @@ export const checkAuthThunk = createAsyncThunk(
       console.log("Auth check successful:", response);
       return response;
     } catch (err) {
-      console.error("Auth check failed:", err);
+      notifyError(err as Error);
       return rejectWithValue((err as Error).message);
     }
   }

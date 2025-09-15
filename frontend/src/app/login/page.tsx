@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { notifyError } from '@/lib/notify';
 
 const schema = z.object({
   email: z.string().email(),
@@ -78,7 +79,7 @@ export default function LoginPage() {
       // If login is successful, the useEffect above will handle the redirect
     } catch (err) {
       // Error is already handled by the Redux slice
-      console.error('Login failed:', err);
+      notifyError(err as Error);
     }
   };
 

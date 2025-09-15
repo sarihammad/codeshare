@@ -8,6 +8,7 @@ import { WebsocketProvider } from 'y-websocket';
 import type { Awareness } from 'y-protocols/awareness';
 import { API_CONFIG, apiCall, API_ENDPOINTS } from '@/config/api';
 import { useToast } from './Toast';
+import { notifyError } from '@/lib/notify';
 
 interface MonacoEditorProps {
   language?: string;
@@ -78,7 +79,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       // Reset to idle after 2 seconds
       setTimeout(() => setSaveState('idle'), 2000);
     } catch (error) {
-      console.warn('Failed to save content:', error);
+      notifyError(error as Error);
       setSaveState('error');
       addToast(
         'Failed to save content. Will retry automatically.',

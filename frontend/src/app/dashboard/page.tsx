@@ -10,6 +10,7 @@ import { AppDispatch } from '@/store';
 import Link from 'next/link';
 import { apiCall, API_ENDPOINTS } from '@/config/api';
 import { motion } from 'framer-motion';
+import { notifyError } from '@/lib/notify';
 import {
   PlusIcon,
   UserGroupIcon,
@@ -55,7 +56,7 @@ const DashboardPage: React.FC = () => {
     try {
       await dispatch(logoutThunk()).unwrap();
     } catch (err) {
-      console.error('Logout failed:', err);
+      notifyError(err as Error);
     }
   };
 
