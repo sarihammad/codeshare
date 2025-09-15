@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("integration")
+@ActiveProfiles("test")
 class MigrationTest {
 
   @Autowired private DataSource dataSource;
