@@ -28,8 +28,12 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   const awarenessRef = useRef<Awareness | null>(null);
   const [userCount, setUserCount] = React.useState(1);
   const [initialContent, setInitialContent] = useState<string>('');
-  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [wsStatus, setWsStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
+  const [saveState, setSaveState] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
+  const [wsStatus, setWsStatus] = useState<
+    'connected' | 'disconnected' | 'connecting'
+  >('connecting');
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { addToast } = useToast();
 
@@ -68,7 +72,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       if (!res.ok) {
         throw new Error(`Failed to save content, status: ${res.status}`);
       }
-      
+
       setSaveState('saved');
       addToast('Content saved successfully', 'success', 2000);
       // Reset to idle after 2 seconds
@@ -76,7 +80,11 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
     } catch (error) {
       console.warn('Failed to save content:', error);
       setSaveState('error');
-      addToast('Failed to save content. Will retry automatically.', 'error', 5000);
+      addToast(
+        'Failed to save content. Will retry automatically.',
+        'error',
+        5000
+      );
       // Reset to idle after 5 seconds on error
       setTimeout(() => setSaveState('idle'), 5000);
     }
@@ -85,7 +93,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   // Manual save function for keyboard shortcut
   const forceSave = async () => {
     if (!editorRef.current || !roomId) return;
-    
+
     const content = editorRef.current.getValue();
     await saveContent(content);
   };
@@ -179,9 +187,12 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
     }
 
     // Add keyboard shortcuts
-    editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-      forceSave();
-    });
+    editorInstance.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+      () => {
+        forceSave();
+      }
+    );
 
     // 3. Bind Monaco to Yjs
     if (ydocRef.current) {
@@ -232,9 +243,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   return (
     <div className="h-full w-full">
       <div className="mb-2 flex justify-between items-center text-xs">
-        <div className="text-gray-500">
-          Active users: {userCount}
-        </div>
+        <div className="text-gray-500">Active users: {userCount}</div>
         <div className="flex gap-4">
           <div>{getSaveStatusDisplay()}</div>
           <div>{getWsStatusDisplay()}</div>
