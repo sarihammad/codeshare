@@ -31,8 +31,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 .addInterceptors(new WebSocketAuthInterceptor(jwtService))
                 .setAllowedOrigins("*");
         
-        // Map Yjs WebSocket to handle roomId in the path
+        // Map Yjs WebSocket to handle roomId in the path with authentication
         registry.addHandler(yjsWebSocketHandler, "/ws/yjs/**")
+                .addInterceptors(new WebSocketAuthInterceptor(jwtService))
                 .setAllowedOrigins("*");
     }
 }
