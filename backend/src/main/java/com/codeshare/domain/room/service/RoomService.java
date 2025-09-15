@@ -3,6 +3,8 @@ package com.codeshare.domain.room.service;
 import com.codeshare.domain.room.Room;
 import com.codeshare.domain.room.RoomRepository;
 import com.codeshare.infrastructure.s3.S3Service;
+import com.codeshare.infrastructure.metrics.MetricsService;
+import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,12 @@ public class RoomService {
     
     private final RoomRepository roomRepository;
     private final S3Service s3Service;
+    private final MetricsService metricsService;
 
-    public RoomService(RoomRepository roomRepository, S3Service s3Service) {
+    public RoomService(RoomRepository roomRepository, S3Service s3Service, MetricsService metricsService) {
         this.roomRepository = roomRepository;
         this.s3Service = s3Service;
+        this.metricsService = metricsService;
     }
 
     public Room createRoom(String name, UUID ownerId, String language) {
@@ -32,13 +36,18 @@ public class RoomService {
                 .createdAt(Instant.now())
                 .memberIds(new HashSet<>(Collections.singleton(ownerId)))
                 .build();
-        return roomRepository.save(room);
+        Room savedRoom = roomRepository.save(room);
+        metricsService.incrementRoomsCreated();
+        metricsService.incrementActiveRooms();
+        return savedRoom;
     }
 
     public Room joinRoom(UUID roomId, UUID userId) {
         Room room = roomRepository.findById(roomId).orElseThrow();
         room.getMemberIds().add(userId);
-        return roomRepository.save(room);
+        Room savedRoom = roomRepository.save(room);
+        metricsService.incrementRoomsJoined();
+        return savedRoom;
     }
 
     public List<Room> getUserRooms(UUID userId) {
@@ -63,13 +72,17 @@ public class RoomService {
 
     // Save current snapshot to S3
     public void saveRoomSnapshot(UUID roomId, String content) {
+        Timer.Sample sample = metricsService.startSnapshotWriteTimer();
         try {
             String key = roomId.toString() + "/current-snapshot.json";
             s3Service.uploadSnapshot(key, content);
+            metricsService.incrementSnapshotsWritten();
             logger.debug("Successfully saved snapshot for room: {}", roomId);
         } catch (Exception e) {
             logger.warn("Failed to save snapshot for room {}: {}", roomId, e.getMessage());
             // Don't throw the exception to prevent 400 errors
+        } finally {
+            metricsService.recordSnapshotWriteDuration(sample);
         }
     }
 

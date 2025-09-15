@@ -2,7 +2,9 @@ package com.codeshare.websocket;
 
 import com.codeshare.domain.editor.model.EditorMessage;
 import com.codeshare.kafka.EditorEventProducer;
+import com.codeshare.infrastructure.metrics.MetricsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -20,15 +22,18 @@ public class EditorRoomHandler extends TextWebSocketHandler {
     private final EditorEventProducer producer;
     private final PresenceService presenceService;
     private final JwtService jwtService;
+    private final MetricsService metricsService;
 
-    public EditorRoomHandler(EditorEventProducer producer, PresenceService presenceService, JwtService jwtService) {
+    public EditorRoomHandler(EditorEventProducer producer, PresenceService presenceService, JwtService jwtService, MetricsService metricsService) {
         this.producer = producer;
         this.presenceService = presenceService;
         this.jwtService = jwtService;
+        this.metricsService = metricsService;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
+        Timer.Sample sample = metricsService.startWebSocketConnectionTimer();
         String roomId = getQueryParam(session, "roomId");
         String userId = extractUserIdFromSession(session);
         roomSessions.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);
@@ -36,6 +41,8 @@ public class EditorRoomHandler extends TextWebSocketHandler {
             presenceService.addUserToRoom(roomId, userId);
             broadcastPresence(roomId);
         }
+        metricsService.incrementWebSocketConnections();
+        metricsService.recordWebSocketConnectionDuration(sample);
     }
 
     @Override
@@ -56,6 +63,7 @@ public class EditorRoomHandler extends TextWebSocketHandler {
             presenceService.removeUserFromRoom(roomId, userId);
             broadcastPresence(roomId);
         }
+        metricsService.incrementWebSocketDisconnections();
     }
 
     public void broadcastToRoom(String roomId, String message) {
