@@ -4,6 +4,7 @@
 import { Provider } from 'react-redux';
 import { store } from '@/store';
 import React, { createContext, useEffect, useState, useContext } from 'react';
+import { ToastProvider } from './Toast';
 
 type Theme = 'dark' | 'light';
 
@@ -55,7 +56,11 @@ export function useTheme() {
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
-      <ThemeProvider>{children}</ThemeProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </ThemeProvider>
     </Provider>
   );
 }

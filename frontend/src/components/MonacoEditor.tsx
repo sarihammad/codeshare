@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Monaco from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
+import * as monaco from 'monaco-editor';
 import * as Y from 'yjs';
 import { MonacoBinding } from 'y-monaco';
 import { WebsocketProvider } from 'y-websocket';
 import type { Awareness } from 'y-protocols/awareness';
 import { API_CONFIG, apiCall, API_ENDPOINTS } from '@/config/api';
+import { useToast } from './Toast';
 
 interface MonacoEditorProps {
   language?: string;
@@ -26,7 +28,10 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   const awarenessRef = useRef<Awareness | null>(null);
   const [userCount, setUserCount] = React.useState(1);
   const [initialContent, setInitialContent] = useState<string>('');
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [wsStatus, setWsStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { addToast } = useToast();
 
   // Load initial content
   useEffect(() => {
@@ -49,22 +54,40 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
     loadContent();
   }, [roomId]);
 
-  // Auto-save function with better error handling
+  // Auto-save function with better error handling and save state
   const saveContent = async (content: string) => {
     if (!roomId || !content) return;
 
     try {
+      setSaveState('saving');
       const res = await apiCall(API_ENDPOINTS.ROOMS.SNAPSHOT(roomId), {
         method: 'POST',
         body: JSON.stringify({ content }),
       });
 
       if (!res.ok) {
-        console.warn('Failed to save content, status:', res.status);
+        throw new Error(`Failed to save content, status: ${res.status}`);
       }
+      
+      setSaveState('saved');
+      addToast('Content saved successfully', 'success', 2000);
+      // Reset to idle after 2 seconds
+      setTimeout(() => setSaveState('idle'), 2000);
     } catch (error) {
       console.warn('Failed to save content:', error);
+      setSaveState('error');
+      addToast('Failed to save content. Will retry automatically.', 'error', 5000);
+      // Reset to idle after 5 seconds on error
+      setTimeout(() => setSaveState('idle'), 5000);
     }
+  };
+
+  // Manual save function for keyboard shortcut
+  const forceSave = async () => {
+    if (!editorRef.current || !roomId) return;
+    
+    const content = editorRef.current.getValue();
+    await saveContent(content);
   };
 
   useEffect(() => {
@@ -85,6 +108,19 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       const ytext = ydoc.getText('monaco');
       ytext.insert(0, initialContent);
     }
+
+    // 2.5. Monitor WebSocket connection status
+    provider.on('status', (event: { status: string }) => {
+      if (event.status === 'connected') {
+        setWsStatus('connected');
+        addToast('Connected to collaboration server', 'success', 3000);
+      } else if (event.status === 'disconnected') {
+        setWsStatus('disconnected');
+        addToast('Disconnected from collaboration server', 'warning', 5000);
+      } else {
+        setWsStatus('connecting');
+      }
+    });
 
     // 3. Awareness (presence)
     const awareness = provider.awareness;
@@ -142,6 +178,11 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       editorInstance.getModel()?.setValue(initialContent);
     }
 
+    // Add keyboard shortcuts
+    editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      forceSave();
+    });
+
     // 3. Bind Monaco to Yjs
     if (ydocRef.current) {
       const ytext = ydocRef.current.getText('monaco');
@@ -161,10 +202,43 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
     }
   }
 
+  // Helper function to get status display
+  const getSaveStatusDisplay = () => {
+    switch (saveState) {
+      case 'saving':
+        return <span className="text-yellow-600">Saving...</span>;
+      case 'saved':
+        return <span className="text-green-600">Saved</span>;
+      case 'error':
+        return <span className="text-red-600">Save failed</span>;
+      default:
+        return <span className="text-gray-500">All changes saved</span>;
+    }
+  };
+
+  const getWsStatusDisplay = () => {
+    switch (wsStatus) {
+      case 'connected':
+        return <span className="text-green-600">● Connected</span>;
+      case 'disconnected':
+        return <span className="text-red-600">● Disconnected</span>;
+      case 'connecting':
+        return <span className="text-yellow-600">● Connecting...</span>;
+      default:
+        return <span className="text-gray-500">● Unknown</span>;
+    }
+  };
+
   return (
     <div className="h-full w-full">
-      <div className="mb-2 text-xs text-gray-500">
-        Active users: {userCount}
+      <div className="mb-2 flex justify-between items-center text-xs">
+        <div className="text-gray-500">
+          Active users: {userCount}
+        </div>
+        <div className="flex gap-4">
+          <div>{getSaveStatusDisplay()}</div>
+          <div>{getWsStatusDisplay()}</div>
+        </div>
       </div>
       <Monaco
         height="60vh"
