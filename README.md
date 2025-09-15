@@ -21,12 +21,14 @@ docker compose up --build
 ## 🎯 Why This Project is Interesting
 
 **Technical Innovation:**
+
 - **CRDT-based Collaboration**: Uses Yjs for conflict-free real-time editing without central coordination
 - **Multi-Protocol Architecture**: Combines WebSocket (Yjs), REST APIs, and Kafka for different use cases
 - **Production-Ready Security**: JWT authentication, rate limiting, CORS, and secure cookies
 - **Observability-First**: Custom Prometheus metrics, structured JSON logs, and OpenTelemetry tracing
 
 **Product Value:**
+
 - **Developer Experience**: Monaco Editor with syntax highlighting, IntelliSense, and collaborative features
 - **Real-time Presence**: See who's editing, where their cursor is, and get live updates
 - **Version Control**: Automatic snapshots and history tracking for collaborative sessions
@@ -83,26 +85,25 @@ Real-time collaborative code editing is enabled using Yjs, a CRDT-based library 
 
 ---
 
-
 ## 🔧 Environment Configuration
 
 Copy `.env.example` to `.env` and configure the following variables:
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `DB_URL` | PostgreSQL connection URL | `jdbc:postgresql://localhost:5432/codeshare` | ✅ |
-| `DB_USER` | Database username | `postgres` | ✅ |
-| `DB_PASSWORD` | Database password | - | ✅ |
-| `JWT_SECRET` | JWT signing secret (min 32 chars) | - | ✅ |
-| `JWT_EXPIRATION` | Token expiration in milliseconds | `86400000` | ❌ |
-| `REDIS_HOST` | Redis host | `localhost` | ❌ |
-| `REDIS_PORT` | Redis port | `6379` | ❌ |
-| `KAFKA_BOOTSTRAP` | Kafka bootstrap servers | `localhost:9092` | ❌ |
-| `FRONTEND_ORIGIN` | Allowed CORS origin | `http://localhost:3000` | ❌ |
-| `COOKIE_SECURE` | Use secure cookies (HTTPS) | `false` | ❌ |
-| `S3_ENABLED` | Enable S3 for snapshots | `false` | ❌ |
-| `S3_BUCKET` | S3 bucket name | `codeshare-bucket` | ❌ |
-| `S3_REGION` | AWS region | `us-east-1` | ❌ |
+| Variable          | Description                       | Default                                      | Required |
+| ----------------- | --------------------------------- | -------------------------------------------- | -------- |
+| `DB_URL`          | PostgreSQL connection URL         | `jdbc:postgresql://localhost:5432/codeshare` | ✅       |
+| `DB_USER`         | Database username                 | `postgres`                                   | ✅       |
+| `DB_PASSWORD`     | Database password                 | -                                            | ✅       |
+| `JWT_SECRET`      | JWT signing secret (min 32 chars) | -                                            | ✅       |
+| `JWT_EXPIRATION`  | Token expiration in milliseconds  | `86400000`                                   | ❌       |
+| `REDIS_HOST`      | Redis host                        | `localhost`                                  | ❌       |
+| `REDIS_PORT`      | Redis port                        | `6379`                                       | ❌       |
+| `KAFKA_BOOTSTRAP` | Kafka bootstrap servers           | `localhost:9092`                             | ❌       |
+| `FRONTEND_ORIGIN` | Allowed CORS origin               | `http://localhost:3000`                      | ❌       |
+| `COOKIE_SECURE`   | Use secure cookies (HTTPS)        | `false`                                      | ❌       |
+| `S3_ENABLED`      | Enable S3 for snapshots           | `false`                                      | ❌       |
+| `S3_BUCKET`       | S3 bucket name                    | `codeshare-bucket`                           | ❌       |
+| `S3_REGION`       | AWS region                        | `us-east-1`                                  | ❌       |
 
 ## 🏗️ Tech Stack
 
@@ -129,6 +130,7 @@ cd frontend && npm run dev
 ### Production Deployment
 
 1. **Set Environment Variables:**
+
    ```bash
    export JWT_SECRET="your-secure-secret-key"
    export DB_PASSWORD="your-db-password"
@@ -137,16 +139,18 @@ cd frontend && npm run dev
    ```
 
 2. **Deploy with Docker Compose:**
+
    ```bash
    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
    ```
 
 3. **Health Checks:**
+
    ```bash
    # Check service health
    curl http://localhost:8080/actuator/health
    curl http://localhost:3000/api/health
-   
+
    # View metrics
    curl http://localhost:8080/actuator/prometheus
    ```
@@ -187,11 +191,13 @@ cd backend
 ### Common Issues
 
 1. **WebSocket Connection Failed:**
+
    - Check if backend is running on port 8080
    - Verify CORS configuration
    - Check browser console for errors
 
 2. **Database Connection Issues:**
+
    - Ensure PostgreSQL is running
    - Check database credentials in `.env`
    - Verify Flyway migrations completed
