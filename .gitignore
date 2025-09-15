@@ -22,4 +22,13 @@ backend/src/main/resources/application.properties.bak.5
 .workspace
 copilot/
 
+# Env files (never commit secrets)
+.env
+.env.*
+frontend/.env
+frontend/.env.*
+
+# Local tooling
+.DS_Store
+
 
