@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from 'react';
 
 interface Toast {
   id: string;
@@ -30,21 +36,24 @@ interface ToastProviderProps {
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = useCallback((message: string, type: Toast['type'], duration = 5000) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const toast: Toast = { id, message, type, duration };
-    
-    setToasts(prev => [...prev, toast]);
-    
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
-  }, []);
+  const addToast = useCallback(
+    (message: string, type: Toast['type'], duration = 5000) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      const toast: Toast = { id, message, type, duration };
+
+      setToasts((prev) => [...prev, toast]);
+
+      if (duration > 0) {
+        setTimeout(() => {
+          removeToast(id);
+        }, duration);
+      }
+    },
+    []
+  );
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
   return (
@@ -60,10 +69,13 @@ interface ToastContainerProps {
   onRemove: (id: string) => void;
 }
 
-const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => {
+const ToastContainer: React.FC<ToastContainerProps> = ({
+  toasts,
+  onRemove,
+}) => {
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2">
-      {toasts.map(toast => (
+      {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
     </div>
@@ -106,3 +118,4 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
     </div>
   );
 };
+
