@@ -2,9 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { BrowserRouter } from 'react-router-dom';
 import ProtectedRoute from '../ProtectedRoute';
-import { authSlice } from '../../store/authSlice';
+import authReducer from '../../store/authSlice';
 
 // Mock Next.js router
 vi.mock('next/navigation', () => ({
@@ -17,7 +16,7 @@ vi.mock('next/navigation', () => ({
 const createMockStore = (initialState = {}) => {
   return configureStore({
     reducer: {
-      auth: authSlice.reducer,
+      auth: authReducer,
     },
     preloadedState: {
       auth: {
@@ -39,7 +38,7 @@ const TestWrapper = ({
   store: unknown;
 }) => (
   <Provider store={store}>
-    <BrowserRouter>{children}</BrowserRouter>
+    {children}
   </Provider>
 );
 

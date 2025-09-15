@@ -8,10 +8,22 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     globals: true,
+    exclude: ["**/e2e/**", "**/node_modules/**", "**/MonacoEditor.test.tsx"],
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  define: {
+    global: "globalThis",
+  },
+  optimizeDeps: {
+    exclude: ["monaco-editor"],
+  },
+  server: {
+    fs: {
+      allow: [".."],
     },
   },
   css: {
