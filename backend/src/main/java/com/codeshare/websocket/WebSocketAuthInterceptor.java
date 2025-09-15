@@ -32,7 +32,7 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
                 String[] cookies = cookieHeader.split(";");
                 for (String cookie : cookies) {
                     String[] parts = cookie.trim().split("=");
-                    if (parts.length == 2 && parts[0].equals("jwt")) {
+                    if (parts.length == 2 && parts[0].equals("token")) {
                         String token = parts[1];
                         logger.info("Found JWT token in cookie for WebSocket handshake");
                         return jwtService.isTokenValid(token);
