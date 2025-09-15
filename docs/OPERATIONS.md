@@ -468,4 +468,3 @@ docker compose exec postgres psql -U postgres -d codeshare -c \
 - **Database Administrator**: [Contact Details]
 - **Security Team**: [Contact Details]
 - **Escalation Path**: [Contact Details]
-

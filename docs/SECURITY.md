@@ -120,4 +120,3 @@ This document outlines the security measures implemented in the CodeShare applic
 - [x] Docker security
 - [x] Security logging
 - [x] Health checks
-

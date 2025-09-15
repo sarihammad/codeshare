@@ -291,4 +291,3 @@ sequenceDiagram
 - **Microservices**: Service decomposition for better scalability
 - **Kubernetes**: Container orchestration for production
 - **Service Mesh**: Istio for service-to-service communication
-
