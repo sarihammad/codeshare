@@ -1,0 +1,30 @@
+# Production profile - secure settings
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+# Production security settings
+jwt:
+  # JWT_SECRET must be set via environment variable
+  expiration: ${JWT_EXPIRATION:86400000}
+
+# Production management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Production logging
+logging:
+  level:
+    com.codeshare: INFO
+    org.springframework.security: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

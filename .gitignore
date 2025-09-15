@@ -10,7 +10,7 @@ frontend/src/App.js
 frontend/src/index.js
 backend/.mvn/
 backend/target/
-backend/src/main/resources/application.yml
+# backend/src/main/resources/application.yml - now using environment variables
 backend/src/main/resources/application.properties
 backend/src/main/resources/application.properties.bak
 backend/src/main/resources/application.properties.bak.1
