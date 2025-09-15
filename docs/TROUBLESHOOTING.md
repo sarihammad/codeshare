@@ -5,12 +5,15 @@
 ### 🚨 WebSocket Connection Issues
 
 #### Problem: "WebSocket connection failed"
+
 **Symptoms:**
+
 - Real-time collaboration not working
 - Users can't see each other's cursors
 - Console shows WebSocket errors
 
 **Solutions:**
+
 ```bash
 # 1. Check if backend is running
 curl http://localhost:8080/actuator/health
@@ -30,11 +33,14 @@ docker compose restart backend frontend
 ```
 
 #### Problem: "Authentication failed for WebSocket"
+
 **Symptoms:**
+
 - WebSocket connects but immediately disconnects
 - 401 errors in browser console
 
 **Solutions:**
+
 ```bash
 # 1. Check JWT token in cookies
 # Open browser dev tools > Application > Cookies
@@ -50,12 +56,15 @@ docker compose restart backend
 ### 🗄️ Database Issues
 
 #### Problem: "Database connection failed"
+
 **Symptoms:**
+
 - Backend fails to start
 - "Connection refused" errors
 - User registration/login fails
 
 **Solutions:**
+
 ```bash
 # 1. Check PostgreSQL container
 docker compose logs postgres
@@ -76,11 +85,14 @@ docker compose exec postgres psql -U postgres -d codeshare -c "SELECT 1;"
 ```
 
 #### Problem: "Migration failed"
+
 **Symptoms:**
+
 - Backend starts but shows migration errors
 - Tables not created properly
 
 **Solutions:**
+
 ```bash
 # 1. Check Flyway logs
 docker compose logs backend | grep -i flyway
@@ -98,12 +110,15 @@ docker compose up backend
 ### 🌐 Frontend Issues
 
 #### Problem: "Frontend not loading"
+
 **Symptoms:**
+
 - Blank page at localhost:3000
 - 404 errors
 - Build failures
 
 **Solutions:**
+
 ```bash
 # 1. Check frontend logs
 docker compose logs frontend
@@ -123,12 +138,15 @@ docker compose restart frontend
 ```
 
 #### Problem: "API calls failing"
+
 **Symptoms:**
+
 - 404 errors for API endpoints
 - CORS errors in browser console
 - Authentication requests failing
 
 **Solutions:**
+
 ```bash
 # 1. Check API base URL
 echo $NEXT_PUBLIC_BACKEND_URL
@@ -149,12 +167,15 @@ curl -X POST http://localhost:8080/api/auth/register \
 ### 🔐 Authentication Issues
 
 #### Problem: "Login not working"
+
 **Symptoms:**
+
 - Login form submits but user stays on login page
 - "Invalid credentials" error
 - Redirect loops
 
 **Solutions:**
+
 ```bash
 # 1. Check user exists in database
 docker compose exec postgres psql -U postgres -d codeshare \
@@ -172,11 +193,14 @@ echo $JWT_EXPIRATION
 ```
 
 #### Problem: "Cookie not being set"
+
 **Symptoms:**
+
 - Login succeeds but user not authenticated
 - Cookie not visible in browser dev tools
 
 **Solutions:**
+
 ```bash
 # 1. Check cookie configuration
 echo $COOKIE_SECURE
@@ -195,12 +219,15 @@ curl -X POST http://localhost:8080/api/auth/login \
 ### 🐳 Docker Issues
 
 #### Problem: "Container won't start"
+
 **Symptoms:**
+
 - Docker containers exit immediately
 - Port conflicts
 - Resource issues
 
 **Solutions:**
+
 ```bash
 # 1. Check container logs
 docker compose logs [service-name]
@@ -219,11 +246,14 @@ sudo systemctl restart docker
 ```
 
 #### Problem: "Volume mounting issues"
+
 **Symptoms:**
+
 - File changes not reflected in container
 - Permission denied errors
 
 **Solutions:**
+
 ```bash
 # 1. Check volume mounts
 docker compose config
@@ -239,12 +269,15 @@ docker compose up
 ### 📊 Performance Issues
 
 #### Problem: "Slow response times"
+
 **Symptoms:**
+
 - High latency for API calls
 - Slow WebSocket message delivery
 - UI feels sluggish
 
 **Solutions:**
+
 ```bash
 # 1. Check resource usage
 docker stats
@@ -261,12 +294,15 @@ docker compose logs backend | grep -i error
 ```
 
 #### Problem: "Memory issues"
+
 **Symptoms:**
+
 - Out of memory errors
 - Containers being killed
 - Slow garbage collection
 
 **Solutions:**
+
 ```bash
 # 1. Increase memory limits in docker-compose.yml
 services:
@@ -286,6 +322,7 @@ docker stats --no-stream
 ### 🔍 Debugging Commands
 
 #### Health Checks
+
 ```bash
 # Backend health
 curl http://localhost:8080/actuator/health
@@ -301,6 +338,7 @@ curl -I http://localhost:3000
 ```
 
 #### Log Analysis
+
 ```bash
 # Follow all logs
 docker compose logs -f
@@ -317,6 +355,7 @@ docker compose logs frontend | grep -i error
 ```
 
 #### Network Debugging
+
 ```bash
 # Test internal connectivity
 docker compose exec backend curl http://postgres:5432
@@ -343,14 +382,16 @@ When reporting issues, include:
 
 ```markdown
 **Environment:**
+
 - OS: [e.g., macOS 12.0, Ubuntu 20.04]
 - Docker version: [e.g., 20.10.8]
 - Browser: [e.g., Chrome 95, Firefox 94]
 
 **Steps to reproduce:**
-1. 
-2. 
-3. 
+
+1.
+2.
+3.
 
 **Expected behavior:**
 [What should happen]
@@ -360,7 +401,9 @@ When reporting issues, include:
 
 **Logs:**
 ```
+
 [Paste relevant logs here]
+
 ```
 
 **Additional context:**
@@ -369,4 +412,4 @@ When reporting issues, include:
 
 ---
 
-*For more help, check the [Operations Guide](OPERATIONS.md) or open an issue on GitHub.*
+_For more help, check the [Operations Guide](OPERATIONS.md) or open an issue on GitHub._

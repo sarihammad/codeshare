@@ -23,22 +23,29 @@ export default function ServerError() {
             />
           </svg>
         </div>
-        
+
         <h1 className="text-4xl font-bold text-gray-900 mb-2">500</h1>
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">Server Error</h2>
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">
+          Server Error
+        </h2>
         <p className="text-gray-600 mb-6">
-          We're experiencing technical difficulties. Our team has been notified and is working to fix the issue.
+          We're experiencing technical difficulties. Our team has been notified
+          and is working to fix the issue.
         </p>
-        
+
         <div className="flex flex-col sm:flex-row gap-3">
           <Button asChild className="flex-1">
             <Link href="/">Go Home</Link>
           </Button>
-          <Button variant="outline" onClick={() => window.location.reload()} className="flex-1">
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+            className="flex-1"
+          >
             Try Again
           </Button>
         </div>
-        
+
         <p className="text-sm text-gray-500 mt-6">
           If the problem persists, please contact our support team.
         </p>
