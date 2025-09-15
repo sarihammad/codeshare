@@ -67,7 +67,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
       {/* Navigation */}
-      <nav className="relative z-50 px-6 py-4">
+      <nav className="relative z-50 px-6 py-4" role="navigation" aria-label="Main navigation">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -101,15 +101,17 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative px-6 py-20 lg:py-32">
+      {/* Main Content */}
+      <main role="main">
+        {/* Hero Section */}
+        <section className="relative px-6 py-20 lg:py-32" aria-labelledby="hero-heading">
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+            <h1 id="hero-heading" className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
               Code Together,
               <span className="bg-gradient-to-r from-red-400 to-black-400 bg-clip-text text-transparent">
                 {' '}
@@ -162,7 +164,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="px-6 py-20 bg-black/20">
+      <section className="px-6 py-20 bg-black/20" aria-labelledby="features-heading">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -171,7 +173,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 id="features-heading" className="text-4xl lg:text-5xl font-bold text-white mb-6">
               Everything You Need to Code Together
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -209,7 +211,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-6 py-20">
+      <section className="px-6 py-20" aria-labelledby="cta-heading">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -217,7 +219,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 id="cta-heading" className="text-4xl lg:text-5xl font-bold text-white mb-6">
               Ready to Transform Your Coding Experience?
             </h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
@@ -233,9 +235,10 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
-      <footer className="px-6 py-12 border-t border-white/10">
+      <footer className="px-6 py-12 border-t border-white/10" role="contentinfo">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="w-6 h-6 bg-gradient-to-r from-red-500 to-black-500 rounded flex items-center justify-center">

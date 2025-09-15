@@ -10,6 +10,10 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
+    // Mock API calls to prevent backend dependency
+    extraHTTPHeaders: {
+      'X-Test-Mode': 'true',
+    },
   },
 
   projects: [
@@ -30,6 +34,7 @@ export default defineConfig({
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
+    timeout: 120 * 1000,
   },
 });
