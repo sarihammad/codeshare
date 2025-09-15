@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import AxeBuilder from '@axe-core/playwright';
 
 test.describe("CodeShare Collaboration", () => {
   test("should allow user registration and login", async ({ page }) => {
@@ -18,6 +19,23 @@ test.describe("CodeShare Collaboration", () => {
 
     // Should redirect to dashboard or show success
     await expect(page).toHaveURL(/dashboard|login/);
+  });
+
+  test("should pass accessibility checks on main pages", async ({ page }) => {
+    // Test homepage accessibility
+    await page.goto("/");
+    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+    expect(accessibilityScanResults.violations).toEqual([]);
+
+    // Test login page accessibility
+    await page.goto("/login");
+    const loginAccessibilityResults = await new AxeBuilder({ page }).analyze();
+    expect(loginAccessibilityResults.violations).toEqual([]);
+
+    // Test register page accessibility
+    await page.goto("/register");
+    const registerAccessibilityResults = await new AxeBuilder({ page }).analyze();
+    expect(registerAccessibilityResults.violations).toEqual([]);
   });
 
   test("should allow room creation", async ({ page }) => {
