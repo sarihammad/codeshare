@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Map;
+import javax.sql.DataSource;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +17,21 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("integration")
 class MigrationTest {
 
+  @Autowired private DataSource dataSource;
+
   @Autowired private JdbcTemplate jdbcTemplate;
+
+  @BeforeEach
+  void setUp() {
+    // Skip tests if using H2 database (test profile with Flyway disabled)
+    try {
+      String url = dataSource.getConnection().getMetaData().getURL();
+      Assumptions.assumeTrue(
+          url.contains("postgresql"), "Skipping Migration tests - requires PostgreSQL database");
+    } catch (Exception e) {
+      Assumptions.assumeTrue(false, "Could not determine database type");
+    }
+  }
 
   @Test
   void testUsersTableExists() {
