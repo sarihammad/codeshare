@@ -14,26 +14,26 @@ graph TB
         A[Web Browser] --> B[Next.js Frontend]
         B --> C[Monaco Editor + Yjs]
     end
-    
+
     subgraph "API Gateway Layer"
         D[Spring Boot Backend]
         E[WebSocket Handlers]
     end
-    
+
     subgraph "Service Layer"
         F[Room Service]
         G[Auth Service]
         H[Presence Service]
         I[S3 Service]
     end
-    
+
     subgraph "Data Layer"
         J[PostgreSQL]
         K[Redis]
         L[AWS S3]
         M[Kafka]
     end
-    
+
     C --> E
     B --> D
     D --> F
@@ -50,17 +50,20 @@ graph TB
 ### Frontend Architecture
 
 #### Next.js Application
+
 - **Framework**: Next.js 15 with App Router
 - **State Management**: Redux Toolkit for global state
 - **Styling**: Tailwind CSS for utility-first styling
 - **Editor**: Monaco Editor for code editing capabilities
 
 #### Real-time Collaboration
+
 - **CRDT Library**: Yjs for conflict-free collaborative editing
 - **WebSocket Provider**: y-websocket for real-time synchronization
 - **Monaco Integration**: y-monaco for Monaco Editor integration
 
 #### Key Components
+
 ```
 src/
 ├── app/                    # Next.js App Router pages
@@ -78,12 +81,14 @@ src/
 ### Backend Architecture
 
 #### Spring Boot Application
+
 - **Framework**: Spring Boot 3.5 with Java 21
 - **Security**: Spring Security with JWT authentication
 - **WebSocket**: Spring WebSocket for real-time communication
 - **Validation**: Bean Validation for input validation
 
 #### Domain-Driven Design
+
 ```
 src/main/java/com/codeshare/
 ├── domain/                # Domain logic
@@ -102,6 +107,7 @@ src/main/java/com/codeshare/
 ```
 
 #### Key Services
+
 - **RoomService**: Manages room creation, joining, and metadata
 - **AuthService**: Handles user authentication and JWT management
 - **PresenceService**: Tracks user presence using Redis
@@ -111,6 +117,7 @@ src/main/java/com/codeshare/
 ### Data Architecture
 
 #### PostgreSQL Database
+
 - **Purpose**: Stores user accounts, room metadata, and relationships
 - **Schema Management**: Flyway migrations for version control
 - **Tables**:
@@ -119,16 +126,19 @@ src/main/java/com/codeshare/
   - `room_members`: Many-to-many relationship between users and rooms
 
 #### Redis Cache
+
 - **Purpose**: Real-time presence tracking and session management
 - **Data Types**: Sets for room membership, Hash for user presence
 - **TTL**: Automatic expiration for inactive users
 
 #### AWS S3
+
 - **Purpose**: Stores code snapshots and version history
 - **Structure**: Organized by room ID with timestamped snapshots
 - **Fallback**: Local storage for development environments
 
 #### Kafka
+
 - **Purpose**: Event streaming for editor changes and system events
 - **Topics**: `editor-events` for real-time collaboration events
 - **Consumer**: Future extensibility for analytics and notifications
@@ -136,13 +146,14 @@ src/main/java/com/codeshare/
 ## Real-time Collaboration Flow
 
 ### 1. Document Synchronization
+
 ```mermaid
 sequenceDiagram
     participant U1 as User 1
     participant U2 as User 2
     participant WS as WebSocket Handler
     participant YJS as Yjs Document
-    
+
     U1->>YJS: Edit document
     YJS->>WS: Broadcast change
     WS->>U2: Send update
@@ -151,13 +162,14 @@ sequenceDiagram
 ```
 
 ### 2. Presence Tracking
+
 ```mermaid
 sequenceDiagram
     participant U1 as User 1
     participant U2 as User 2
     participant WS as WebSocket Handler
     participant Redis as Redis Cache
-    
+
     U1->>WS: Join room
     WS->>Redis: Add user to room
     WS->>U2: Broadcast presence update
@@ -165,13 +177,14 @@ sequenceDiagram
 ```
 
 ### 3. Snapshot Management
+
 ```mermaid
 sequenceDiagram
     participant Editor as Monaco Editor
     participant API as REST API
     participant S3 as S3 Service
     participant DB as Database
-    
+
     Editor->>API: Save snapshot
     API->>S3: Store snapshot
     API->>DB: Update metadata
@@ -181,6 +194,7 @@ sequenceDiagram
 ## Security Architecture
 
 ### Authentication Flow
+
 1. User submits credentials via REST API
 2. Backend validates credentials against database
 3. JWT token generated and stored in httpOnly cookie
@@ -188,6 +202,7 @@ sequenceDiagram
 5. WebSocket connections validate JWT during handshake
 
 ### Security Measures
+
 - **JWT Authentication**: Stateless authentication with configurable expiration
 - **Secure Cookies**: httpOnly, secure, and SameSite attributes
 - **Rate Limiting**: Bucket4j for API endpoint protection
@@ -198,6 +213,7 @@ sequenceDiagram
 ## Observability Architecture
 
 ### Metrics Collection
+
 - **Prometheus**: Custom metrics for business logic
 - **Micrometer**: Application metrics integration
 - **Custom Metrics**:
@@ -207,12 +223,14 @@ sequenceDiagram
   - `codeshare.rooms.created`: Total rooms created
 
 ### Logging Strategy
+
 - **Structured Logging**: JSON format in production
 - **Log Levels**: Configurable per component
 - **Correlation IDs**: Request tracing across services
 - **Log Aggregation**: Ready for ELK stack integration
 
 ### Tracing
+
 - **OpenTelemetry**: Distributed tracing support
 - **Zipkin Integration**: Trace visualization
 - **Sampling**: Configurable sampling rates for production
@@ -220,18 +238,21 @@ sequenceDiagram
 ## Scalability Considerations
 
 ### Horizontal Scaling
+
 - **Stateless Backend**: JWT-based authentication enables horizontal scaling
 - **Redis Clustering**: Presence service can be clustered
 - **Database Sharding**: Room-based sharding strategy
 - **Load Balancing**: WebSocket sticky sessions for real-time features
 
 ### Performance Optimizations
+
 - **Connection Pooling**: Database and Redis connection pooling
 - **Caching**: Redis for frequently accessed data
 - **CDN**: Static assets served via CDN
 - **Compression**: Gzip compression for API responses
 
 ### Monitoring and Alerting
+
 - **Health Checks**: Comprehensive health check endpoints
 - **Custom Dashboards**: Grafana dashboards for key metrics
 - **Alerting**: Prometheus alerting rules for critical issues
@@ -240,12 +261,14 @@ sequenceDiagram
 ## Deployment Architecture
 
 ### Container Strategy
+
 - **Multi-stage Builds**: Optimized Docker images
 - **Non-root Users**: Security-hardened containers
 - **Health Checks**: Built-in container health monitoring
 - **Resource Limits**: Memory and CPU constraints
 
 ### Environment Configuration
+
 - **Environment Variables**: All configuration externalized
 - **Profile-based Config**: Different configs for dev/staging/prod
 - **Secret Management**: Environment-based secret injection
@@ -254,6 +277,7 @@ sequenceDiagram
 ## Future Enhancements
 
 ### Planned Features
+
 - **Real-time Chat**: In-room messaging system
 - **File Management**: Multi-file project support
 - **Version Control**: Git integration for code history
@@ -261,8 +285,10 @@ sequenceDiagram
 - **Plugin System**: Extensible editor functionality
 
 ### Technical Improvements
+
 - **GraphQL API**: More efficient data fetching
 - **Event Sourcing**: Complete audit trail of changes
 - **Microservices**: Service decomposition for better scalability
 - **Kubernetes**: Container orchestration for production
 - **Service Mesh**: Istio for service-to-service communication
+
