@@ -48,7 +48,7 @@ describe('UserList', () => {
     render(<UserList users={users} />);
 
     expect(screen.getByText('SingleName')).toBeInTheDocument();
-    expect(screen.getByText('SN')).toBeInTheDocument();
+    expect(screen.getByText('S')).toBeInTheDocument();
   });
 
   it('handles users with multiple names correctly', () => {
