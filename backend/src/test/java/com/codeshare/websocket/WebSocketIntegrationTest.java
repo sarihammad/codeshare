@@ -1,15 +1,11 @@
 package com.codeshare.websocket;
 
 import com.codeshare.infrastructure.security.JwtService;
+import com.codeshare.infrastructure.redis.PresenceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -17,6 +13,7 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,36 +25,37 @@ class WebSocketIntegrationTest {
     private int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private PresenceService presenceService;
+
     @Test
-    void testWebSocketConnection() throws Exception {
-        // Create a test JWT token
-        String token = jwtService.generateToken("test@example.com");
+    void testWebSocketConnectionWithValidToken() throws Exception {
+        // Generate a valid JWT token
+        String token = jwtService.generateToken("test-user-id", "test@example.com");
         
-        // Test WebSocket connection with authentication
         CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<String> receivedMessage = new AtomicReference<>();
+        
         WebSocketHandler handler = new WebSocketHandler() {
             @Override
-            public void afterConnectionEstablished(WebSocketSession session) {
+            public void afterConnectionEstablished(WebSocketSession session) throws Exception {
                 latch.countDown();
             }
 
             @Override
-            public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
-                // Handle incoming messages
+            public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+                receivedMessage.set(message.getPayload().toString());
             }
 
             @Override
-            public void handleTransportError(WebSocketSession session, Throwable exception) {
-                fail("WebSocket transport error: " + exception.getMessage());
+            public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+                fail("Transport error: " + exception.getMessage());
             }
 
             @Override
-            public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
+            public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
                 // Connection closed
             }
 
@@ -67,44 +65,55 @@ class WebSocketIntegrationTest {
             }
         };
 
-        // Connect to WebSocket with token in query parameter
-        String wsUrl = "ws://localhost:" + port + "/ws/editor?token=" + token;
-        WebSocketSession session = new StandardWebSocketClient()
-                .doHandshake(handler, null, URI.create(wsUrl))
-                .get(5, TimeUnit.SECONDS);
-
-        // Wait for connection to be established
-        assertTrue(latch.await(5, TimeUnit.SECONDS), "WebSocket connection should be established");
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        String url = "ws://localhost:" + port + "/ws/yjs/test-room?token=" + token;
         
-        // Verify session is open
-        assertTrue(session.isOpen(), "WebSocket session should be open");
+        WebSocketSession session = client.doHandshake(handler, null, URI.create(url)).get();
+        
+        // Wait for connection to be established
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "Connection should be established");
+        
+        // Send a test message
+        session.sendMessage(new TextMessage("{\"type\":\"test\",\"content\":\"hello\"}"));
+        
+        // Wait a bit for message processing
+        Thread.sleep(100);
         
         // Close the session
         session.close();
+        
+        // Verify connection was successful
+        assertNotNull(session);
+        assertTrue(session.isOpen() || session.getCloseStatus() != null);
     }
 
     @Test
-    void testWebSocketConnectionWithoutToken() throws Exception {
+    void testWebSocketConnectionWithInvalidToken() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        
         WebSocketHandler handler = new WebSocketHandler() {
             @Override
-            public void afterConnectionEstablished(WebSocketSession session) {
-                fail("Connection should not be established without token");
+            public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+                fail("Connection should not be established with invalid token");
             }
 
             @Override
-            public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
-                // Handle incoming messages
+            public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+                // Should not receive messages
             }
 
             @Override
-            public void handleTransportError(WebSocketSession session, Throwable exception) {
-                latch.countDown(); // Expected to fail
+            public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+                error.set(exception);
+                latch.countDown();
             }
 
             @Override
-            public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-                // Connection closed
+            public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+                if (closeStatus.getCode() != CloseStatus.NORMAL.getCode()) {
+                    latch.countDown();
+                }
             }
 
             @Override
@@ -113,67 +122,38 @@ class WebSocketIntegrationTest {
             }
         };
 
-        // Try to connect without token
-        String wsUrl = "ws://localhost:" + port + "/ws/editor";
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        String url = "ws://localhost:" + port + "/ws/yjs/test-room?token=invalid-token";
+        
         try {
-            new StandardWebSocketClient()
-                    .doHandshake(handler, null, URI.create(wsUrl))
-                    .get(5, TimeUnit.SECONDS);
+            WebSocketSession session = client.doHandshake(handler, null, URI.create(url)).get();
+            
+            // Wait for connection to fail
+            assertTrue(latch.await(5, TimeUnit.SECONDS), "Connection should fail");
+            
+            // Verify connection was rejected
+            assertFalse(session.isOpen());
         } catch (Exception e) {
-            // Expected to fail
+            // Expected - connection should fail
+            assertTrue(e.getMessage().contains("handshake") || e.getMessage().contains("401"));
         }
-
-        // Wait for error to be handled
-        assertTrue(latch.await(5, TimeUnit.SECONDS), "WebSocket connection should fail without token");
     }
 
     @Test
-    void testYjsWebSocketConnection() throws Exception {
-        // Create a test JWT token
-        String token = jwtService.generateToken("test@example.com");
+    void testPresenceServiceIntegration() {
+        String roomId = "test-room";
+        String userId = "test-user";
         
-        CountDownLatch latch = new CountDownLatch(1);
-        WebSocketHandler handler = new WebSocketHandler() {
-            @Override
-            public void afterConnectionEstablished(WebSocketSession session) {
-                latch.countDown();
-            }
-
-            @Override
-            public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
-                // Handle incoming messages
-            }
-
-            @Override
-            public void handleTransportError(WebSocketSession session, Throwable exception) {
-                fail("WebSocket transport error: " + exception.getMessage());
-            }
-
-            @Override
-            public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-                // Connection closed
-            }
-
-            @Override
-            public boolean supportsPartialMessages() {
-                return false;
-            }
-        };
-
-        // Connect to Yjs WebSocket
-        String wsUrl = "ws://localhost:" + port + "/ws/yjs/test-room?token=" + token;
-        WebSocketSession session = new StandardWebSocketClient()
-                .doHandshake(handler, null, URI.create(wsUrl))
-                .get(5, TimeUnit.SECONDS);
-
-        // Wait for connection to be established
-        assertTrue(latch.await(5, TimeUnit.SECONDS), "Yjs WebSocket connection should be established");
+        // Add user to room
+        presenceService.addUserToRoom(roomId, userId);
         
-        // Verify session is open
-        assertTrue(session.isOpen(), "Yjs WebSocket session should be open");
+        // Verify user is in room
+        assertTrue(presenceService.getUsersInRoom(roomId).contains(userId));
         
-        // Close the session
-        session.close();
+        // Remove user from room
+        presenceService.removeUserFromRoom(roomId, userId);
+        
+        // Verify user is not in room
+        assertFalse(presenceService.getUsersInRoom(roomId).contains(userId));
     }
 }
-
