@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import AxeBuilder from '@axe-core/playwright';
+import AxeBuilder from "@axe-core/playwright";
 
 test.describe("CodeShare Collaboration", () => {
   test("should allow user registration and login", async ({ page }) => {
@@ -34,7 +34,9 @@ test.describe("CodeShare Collaboration", () => {
 
     // Test register page accessibility
     await page.goto("/register");
-    const registerAccessibilityResults = await new AxeBuilder({ page }).analyze();
+    const registerAccessibilityResults = await new AxeBuilder({
+      page,
+    }).analyze();
     expect(registerAccessibilityResults.violations).toEqual([]);
   });
 

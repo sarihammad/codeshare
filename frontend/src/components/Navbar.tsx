@@ -19,20 +19,40 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="w-full bg-white shadow flex items-center justify-between px-6 py-3" role="navigation" aria-label="Main navigation">
-      <Link href="/" className="text-xl font-bold text-red-600" aria-label="CodeShare home">
+    <nav
+      className="w-full bg-white shadow flex items-center justify-between px-6 py-3"
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <Link
+        href="/"
+        className="text-xl font-bold text-red-600"
+        aria-label="CodeShare home"
+      >
         CodeShare
       </Link>
       <div className="flex items-center gap-4">
         {isAuthenticated ? (
           <>
-            <Link href="/dashboard" className="hover:text-red-600" aria-label="Go to dashboard">
+            <Link
+              href="/dashboard"
+              className="hover:text-red-600"
+              aria-label="Go to dashboard"
+            >
               Dashboard
             </Link>
-            <Link href="/profile" className="hover:text-red-600" aria-label="Go to profile">
+            <Link
+              href="/profile"
+              className="hover:text-red-600"
+              aria-label="Go to profile"
+            >
               Profile
             </Link>
-            <Link href="/settings" className="hover:text-red-600" aria-label="Go to settings">
+            <Link
+              href="/settings"
+              className="hover:text-red-600"
+              aria-label="Go to settings"
+            >
               Settings
             </Link>
             <button
@@ -45,10 +65,18 @@ const Navbar: React.FC = () => {
           </>
         ) : (
           <>
-            <Link href="/login" className="hover:text-red-600" aria-label="Login to account">
+            <Link
+              href="/login"
+              className="hover:text-red-600"
+              aria-label="Login to account"
+            >
               Login
             </Link>
-            <Link href="/register" className="hover:text-red-600" aria-label="Create new account">
+            <Link
+              href="/register"
+              className="hover:text-red-600"
+              aria-label="Create new account"
+            >
               Register
             </Link>
           </>
