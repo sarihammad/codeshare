@@ -31,11 +31,15 @@ const createMockStore = (initialState = {}) => {
   });
 };
 
-const TestWrapper = ({ children, store }: { children: React.ReactNode; store: any }) => (
+const TestWrapper = ({
+  children,
+  store,
+}: {
+  children: React.ReactNode;
+  store: any;
+}) => (
   <Provider store={store}>
-    <BrowserRouter>
-      {children}
-    </BrowserRouter>
+    <BrowserRouter>{children}</BrowserRouter>
   </Provider>
 );
 
