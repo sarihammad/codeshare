@@ -20,6 +20,18 @@ class FlywayMigrationTest {
 
   @Autowired private JdbcTemplate jdbcTemplate;
 
+  @BeforeEach
+  void setUp() {
+    // Skip tests if using H2 database (test profile with Flyway disabled)
+    try {
+      String url = dataSource.getConnection().getMetaData().getURL();
+      Assumptions.assumeTrue(
+          url.contains("postgresql"), "Skipping Flyway tests - requires PostgreSQL database");
+    } catch (Exception e) {
+      Assumptions.assumeTrue(false, "Could not determine database type");
+    }
+  }
+
   @Test
   void testFlywayMigrationsApplied() {
     // Verify that Flyway migrations have been applied
