@@ -39,13 +39,20 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "21"
-      - name: Cache dependencies
+      - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.m2/repository
-            frontend/node_modules
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', 'frontend/package-lock.json') }}
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Cache Node dependencies
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Install backend dependencies
         run: cd backend && ./mvnw dependency:go-offline
       - name: Install frontend dependencies
@@ -55,11 +62,47 @@ jobs:
       - name: Test backend
         run: cd backend && ./mvnw test
       - name: Test frontend
-        run: cd frontend && npm run test -- --watchAll=false || true
+        run: cd frontend && npm run test -- --run --coverage
       - name: Build backend
         run: cd backend && ./mvnw package -DskipTests
       - name: Build frontend
         run: cd frontend && npm run build
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            frontend/coverage/
+            backend/target/site/jacoco/
+
+  e2e-tests:
+    needs: build-test-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Cache Node dependencies
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+      - name: Install Playwright browsers
+        run: cd frontend && npx playwright install --with-deps
+      - name: Start services with Docker Compose
+        run: |
+          docker compose up -d
+          # Wait for services to be healthy
+          timeout 300 bash -c 'until docker compose ps | grep -q "healthy"; do sleep 5; done'
+      - name: Run Playwright tests
+        run: cd frontend && npm run e2e
+      - name: Stop services
+        if: always()
+        run: docker compose down
 
   docker-build-push:
     needs: build-test-lint
