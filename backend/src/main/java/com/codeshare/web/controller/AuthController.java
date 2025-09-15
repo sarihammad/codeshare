@@ -20,22 +20,18 @@ public class AuthController {
     }
 
     private ResponseCookie.ResponseCookieBuilder createCookieBuilder(String token) {
-        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from("auth-token", token)
+        // Get JWT expiration from environment or use default
+        long expirationMs = Long.parseLong(System.getenv().getOrDefault("JWT_EXPIRATION", "86400000"));
+        long expirationSeconds = expirationMs / 1000;
+        
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from("token", token)
                 .httpOnly(true)
-                .secure(false) // Set to true in production with HTTPS
+                .secure(Boolean.parseBoolean(System.getenv().getOrDefault("COOKIE_SECURE", "false")))
                 .path("/")
-                .maxAge(7 * 24 * 60 * 60) // 7 days
+                .maxAge(expirationSeconds)
                 .sameSite("Lax");
         
-        // Set domain only for production, not for localhost
-        String host = System.getenv("HOST") != null ? System.getenv("HOST") : "localhost";
-        logger.info("Creating cookie for host: {}", host);
-        if (!host.contains("localhost")) {
-            builder.domain("codesh-Publi-ymCC7MFYWsP4-1558037911.us-east-2.elb.amazonaws.com");
-            logger.info("Setting cookie domain for production");
-        } else {
-            logger.info("Not setting cookie domain for localhost");
-        }
+        logger.info("Creating secure cookie with expiration: {} seconds", expirationSeconds);
         
         return builder;
     }
