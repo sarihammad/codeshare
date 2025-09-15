@@ -60,4 +60,3 @@ describe('UserList', () => {
     expect(screen.getByText('JM')).toBeInTheDocument();
   });
 });
-

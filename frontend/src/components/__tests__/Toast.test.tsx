@@ -122,4 +122,3 @@ describe('Toast', () => {
     consoleSpy.mockRestore();
   });
 });
-
