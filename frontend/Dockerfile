@@ -1,13 +1,8 @@
-# Install dependencies only when needed
-FROM node:20-alpine AS deps
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps --omit=dev --ignore-scripts && npm cache clean --force
-
 # Build the app
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps --ignore-scripts && npm cache clean --force
 COPY . .
 
 # Build the application
@@ -24,6 +19,10 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Install only production dependencies
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps --omit=dev --ignore-scripts && npm cache clean --force
 
 # Copy built application
 COPY --from=builder /app/public ./public
