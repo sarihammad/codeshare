@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/codeshare_test
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    clean-disabled: false
+jwt:
+  secret: 0123456789abcdef0123456789abcdef
+  expiration: 3600000
+s3:
+  region: us-east-1
+  bucket: test-bucket
+  enabled: false
