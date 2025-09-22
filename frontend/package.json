@@ -12,7 +12,10 @@
     "test:ui": "vitest --ui",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate-types": "openapi-typescript http://localhost:8080/api-docs -o src/types/api.ts",
+    "generate-types:prod": "openapi-typescript https://api.codeshare.dev/api-docs -o src/types/api.ts",
+    "prebuild": "npm run generate-types"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -79,6 +82,7 @@
     "ignore-loader": "^0.1.2",
     "jsdom": "^25.0.1",
     "lint-staged": "^16.1.6",
+    "openapi-typescript": "^7.4.2",
     "source-map-loader": "^5.0.0",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.4",

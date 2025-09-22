@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @Validated
+@Tag(name = "Authentication", description = "User authentication and authorization endpoints")
 public class AuthController {
   private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
   private final AuthService authService;
@@ -57,8 +58,47 @@ public class AuthController {
     return builder;
   }
 
+  @Operation(
+      summary = "Register a new user",
+      description = "Creates a new user account and returns authentication tokens")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "User registered successfully",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = AuthResponse.class),
+                    examples =
+                        @ExampleObject(
+                            name = "Success Response",
+                            value = "{\"message\": \"success\"}"))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    examples =
+                        @ExampleObject(
+                            name = "Validation Error",
+                            value = "{\"error\": \"Email is required\"}"))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "User already exists",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    examples =
+                        @ExampleObject(
+                            name = "Conflict Error",
+                            value = "{\"error\": \"User already exists\"}")))
+      })
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+  public ResponseEntity<AuthResponse> register(
+      @Parameter(description = "User registration data", required = true) @Valid @RequestBody
+          RegisterRequest request) {
     logger.info("Register request for email: {}", request.email());
     AuthResponse authResponse = authService.register(request);
 
@@ -73,8 +113,37 @@ public class AuthController {
         .body(new AuthResponse("success"));
   }
 
+  @Operation(
+      summary = "Login user",
+      description = "Authenticates a user and returns authentication tokens")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "User logged in successfully",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = AuthResponse.class),
+                    examples =
+                        @ExampleObject(
+                            name = "Success Response",
+                            value = "{\"message\": \"success\"}"))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Invalid credentials",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    examples =
+                        @ExampleObject(
+                            name = "Unauthorized",
+                            value = "{\"error\": \"Invalid credentials\"}")))
+      })
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+  public ResponseEntity<AuthResponse> login(
+      @Parameter(description = "User login credentials", required = true) @Valid @RequestBody
+          AuthRequest request) {
     logger.info("Login request for email: {}", request.email());
     AuthResponse authResponse = authService.authenticate(request);
 
