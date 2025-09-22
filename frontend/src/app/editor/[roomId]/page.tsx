@@ -6,6 +6,9 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import dynamic from 'next/dynamic';
 import UserList from '@/components/UserList';
 import EditorSkeleton from '@/components/EditorSkeleton';
+import SkipToEditor from '@/components/SkipToEditor';
+import CommandPalette from '@/components/CommandPalette';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { apiCall, API_ENDPOINTS } from '@/config/api';
 
 const MonacoEditor = dynamic(() => import('@/components/MonacoEditor'), {
@@ -31,6 +34,7 @@ const EditorPage: React.FC = () => {
   const [userIds, setUserIds] = useState<string[]>([]);
   const [language, setLanguage] = useState('javascript');
   const [theme, setTheme] = useState<'vs-dark' | 'light'>('vs-dark');
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const users = userIds.map((id) => ({
     name: `User ${id.slice(0, 6)}`,
     color: getColorForUserId(id),
@@ -99,10 +103,22 @@ const EditorPage: React.FC = () => {
     }
   };
 
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onSave: handleSaveSnapshot,
+    onCommandPalette: () => setIsCommandPaletteOpen(true),
+  });
+
   return (
     <ProtectedRoute>
+      <SkipToEditor roomId={roomId} />
+      <CommandPalette 
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onSave={handleSaveSnapshot}
+      />
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
-        <div className="mx-auto py-8 px-4">
+        <main className="mx-auto py-8 px-4">
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
@@ -139,7 +155,7 @@ const EditorPage: React.FC = () => {
               <MonacoEditor language={language} roomId={roomId} />
               <button
                 onClick={handleSaveSnapshot}
-                className="mt-4 px-4 py-2 bg-gradient-to-r from-red-500 to-black-500 text-white rounded hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105"
+                className="mt-4 px-4 py-2 bg-gradient-to-r from-red-500 to-black text-white rounded hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105"
               >
                 Save Snapshot
               </button>
@@ -153,7 +169,7 @@ const EditorPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </ProtectedRoute>
   );

@@ -170,7 +170,7 @@ const HistoryPage: React.FC = () => {
                           <td className="py-3 px-4 text-center">
                             <button
                               onClick={() => handleDownload(snap.key)}
-                              className="px-3 py-1 bg-gradient-to-r from-red-500 to-black-500 text-white rounded hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-sm"
+                              className="px-3 py-1 bg-gradient-to-r from-red-500 to-black text-white rounded hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-sm"
                             >
                               Download
                             </button>
@@ -198,7 +198,7 @@ const HistoryPage: React.FC = () => {
                 <button
                   onClick={handleViewDiff}
                   disabled={selected.length !== 2 || diffLoading}
-                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-black-500 text-white rounded hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-black text-white rounded hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {diffLoading ? 'Loading...' : 'View Diff'}
                 </button>

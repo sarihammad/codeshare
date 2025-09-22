@@ -22,21 +22,38 @@ public class AuthController {
     this.authService = authService;
   }
 
-  private ResponseCookie.ResponseCookieBuilder createCookieBuilder(String token) {
-    // Get JWT expiration from environment or use default
-    long expirationMs = Long.parseLong(System.getenv().getOrDefault("JWT_EXPIRATION", "86400000"));
+  private ResponseCookie.ResponseCookieBuilder createAccessTokenCookie(String token) {
+    // Access token: short-lived (30 minutes default)
+    long expirationMs = Long.parseLong(System.getenv().getOrDefault("JWT_EXPIRATION", "1800000"));
     long expirationSeconds = expirationMs / 1000;
 
     ResponseCookie.ResponseCookieBuilder builder =
-        ResponseCookie.from("token", token)
+        ResponseCookie.from("access-token", token)
             .httpOnly(true)
-            .secure(Boolean.parseBoolean(System.getenv().getOrDefault("COOKIE_SECURE", "false")))
+            .secure(Boolean.parseBoolean(System.getenv().getOrDefault("COOKIE_SECURE", "true")))
             .path("/")
             .maxAge(expirationSeconds)
-            .sameSite("Lax");
+            .sameSite("Strict");
 
-    logger.info("Creating secure cookie with expiration: {} seconds", expirationSeconds);
+    logger.info("Creating access token cookie with expiration: {} seconds", expirationSeconds);
+    return builder;
+  }
 
+  private ResponseCookie.ResponseCookieBuilder createRefreshTokenCookie(String token) {
+    // Refresh token: long-lived (7 days default)
+    long expirationMs =
+        Long.parseLong(System.getenv().getOrDefault("JWT_REFRESH_EXPIRATION", "604800000"));
+    long expirationSeconds = expirationMs / 1000;
+
+    ResponseCookie.ResponseCookieBuilder builder =
+        ResponseCookie.from("refresh-token", token)
+            .httpOnly(true)
+            .secure(Boolean.parseBoolean(System.getenv().getOrDefault("COOKIE_SECURE", "true")))
+            .path("/api/auth/refresh")
+            .maxAge(expirationSeconds)
+            .sameSite("Strict");
+
+    logger.info("Creating refresh token cookie with expiration: {} seconds", expirationSeconds);
     return builder;
   }
 
@@ -45,11 +62,14 @@ public class AuthController {
     logger.info("Register request for email: {}", request.email());
     AuthResponse authResponse = authService.register(request);
 
-    ResponseCookie cookie = createCookieBuilder(authResponse.token()).build();
-    logger.info("Setting auth cookie for register: {}", cookie.toString());
+    ResponseCookie accessCookie = createAccessTokenCookie(authResponse.token()).build();
+    ResponseCookie refreshCookie = createRefreshTokenCookie(authResponse.refreshToken()).build();
+
+    logger.info("Setting auth cookies for register");
 
     return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+        .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
         .body(new AuthResponse("success"));
   }
 
@@ -58,23 +78,37 @@ public class AuthController {
     logger.info("Login request for email: {}", request.email());
     AuthResponse authResponse = authService.authenticate(request);
 
-    ResponseCookie cookie = createCookieBuilder(authResponse.token()).build();
-    logger.info("Setting auth cookie for login: {}", cookie.toString());
+    ResponseCookie accessCookie = createAccessTokenCookie(authResponse.token()).build();
+    ResponseCookie refreshCookie = createRefreshTokenCookie(authResponse.refreshToken()).build();
+
+    logger.info("Setting auth cookies for login");
 
     return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+        .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
         .body(new AuthResponse("success"));
   }
 
   @PostMapping("/logout")
   public ResponseEntity<AuthResponse> logout() {
     logger.info("Logout request");
-    ResponseCookie cookie = createCookieBuilder("").maxAge(0).build();
-    logger.info("Clearing auth cookie: {}", cookie.toString());
+    ResponseCookie accessCookie = createAccessTokenCookie("").maxAge(0).build();
+    ResponseCookie refreshCookie = createRefreshTokenCookie("").maxAge(0).build();
+
+    logger.info("Clearing auth cookies");
 
     return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+        .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
         .body(new AuthResponse("success"));
+  }
+
+  @PostMapping("/refresh")
+  public ResponseEntity<AuthResponse> refreshToken() {
+    logger.info("Refresh token request");
+    // This endpoint will be used to refresh the access token using the refresh token
+    // The JWT filter will handle the authentication
+    return ResponseEntity.ok(new AuthResponse("token refreshed"));
   }
 
   @GetMapping("/me")

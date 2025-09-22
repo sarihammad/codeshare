@@ -34,9 +34,7 @@ export const loginThunk = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log("Login attempt for:", email);
       await loginApi(email, password);
-      console.log("Login successful");
       return { email };
     } catch (err) {
       notifyError(err as Error);
@@ -105,54 +103,45 @@ const authSlice = createSlice({
     builder
       // Login
       .addCase(loginThunk.pending, (state) => {
-        console.log("Login pending");
         state.loading = true;
         state.error = null;
       })
       .addCase(loginThunk.fulfilled, (state, action) => {
-        console.log("Login fulfilled:", action.payload);
         state.loading = false;
         state.isAuthenticated = true;
         state.user = { id: "temp", email: action.payload.email, name: null };
         state.error = null;
       })
       .addCase(loginThunk.rejected, (state, action) => {
-        console.log("Login rejected:", action.payload);
         state.loading = false;
         state.error = action.payload as string;
       })
       // Register
       .addCase(registerThunk.pending, (state) => {
-        console.log("Register pending");
         state.loading = true;
         state.error = null;
       })
       .addCase(registerThunk.fulfilled, (state, action) => {
-        console.log("Register fulfilled:", action.payload);
         state.loading = false;
         state.isAuthenticated = true;
         state.user = { id: "temp", email: action.payload.email, name: null };
         state.error = null;
       })
       .addCase(registerThunk.rejected, (state, action) => {
-        console.log("Register rejected:", action.payload);
         state.loading = false;
         state.error = action.payload as string;
       })
       // Logout
       .addCase(logoutThunk.pending, (state) => {
-        console.log("Logout pending");
         state.loading = true;
       })
       .addCase(logoutThunk.fulfilled, (state) => {
-        console.log("Logout fulfilled");
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;
         state.error = null;
       })
       .addCase(logoutThunk.rejected, (state, action) => {
-        console.log("Logout rejected:", action.payload);
         state.loading = false;
         // Even if logout fails, clear the auth state
         state.isAuthenticated = false;
@@ -161,12 +150,10 @@ const authSlice = createSlice({
       })
       // Check Auth
       .addCase(checkAuthThunk.pending, (state) => {
-        console.log("Check auth pending");
         state.loading = true;
         state.error = null;
       })
-      .addCase(checkAuthThunk.fulfilled, (state, action) => {
-        console.log("Check auth fulfilled:", action.payload);
+      .addCase(checkAuthThunk.fulfilled, (state) => {
         state.loading = false;
         state.isAuthenticated = true;
         // We don't have user details from the /me endpoint, so we'll keep it simple
@@ -178,7 +165,6 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(checkAuthThunk.rejected, (state, action) => {
-        console.log("Check auth rejected:", action.payload);
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;

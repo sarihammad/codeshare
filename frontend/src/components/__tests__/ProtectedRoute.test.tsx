@@ -49,11 +49,7 @@ const TestWrapper = ({
 }: {
   children: React.ReactNode;
   store: unknown;
-}) => (
-  <Provider store={store}>
-    {children}
-  </Provider>
-);
+}) => <Provider store={store}>{children}</Provider>;
 
 describe('ProtectedRoute', () => {
   beforeEach(() => {

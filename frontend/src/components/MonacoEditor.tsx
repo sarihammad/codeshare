@@ -52,7 +52,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
           setInitialContent(data.content || '');
         }
       } catch {
-        console.log('No existing content found, starting fresh');
+        // No existing content found, starting fresh
       }
     };
 
@@ -174,10 +174,46 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
-      provider.destroy();
-      ydoc.destroy();
+      // Proper cleanup to prevent memory leaks
+      if (providerRef.current) {
+        providerRef.current.destroy();
+        providerRef.current = null;
+      }
+      if (ydocRef.current) {
+        ydocRef.current.destroy();
+        ydocRef.current = null;
+      }
+      if (editorRef.current) {
+        editorRef.current.dispose();
+        editorRef.current = null;
+      }
+      if (awarenessRef.current) {
+        awarenessRef.current.destroy();
+        awarenessRef.current = null;
+      }
     };
   }, [roomId, userId, onAwarenessUpdate, initialContent, saveContent, addToast]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      if (providerRef.current) {
+        providerRef.current.destroy();
+      }
+      if (ydocRef.current) {
+        ydocRef.current.destroy();
+      }
+      if (editorRef.current) {
+        editorRef.current.dispose();
+      }
+      if (awarenessRef.current) {
+        awarenessRef.current.destroy();
+      }
+    };
+  }, []);
 
   function handleEditorDidMount(editorInstance: editor.IStandaloneCodeEditor) {
     editorRef.current = editorInstance;

@@ -39,7 +39,6 @@ export default function LoginPage() {
   // Check authentication status on mount
   useEffect(() => {
     if (!hasCheckedAuth) {
-      console.log('Login page: Checking authentication status...');
       dispatch(checkAuthThunk()).finally(() => {
         setHasCheckedAuth(true);
       });
@@ -49,26 +48,14 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (hasCheckedAuth && isAuthenticated && !loading) {
-      console.log(
-        'Login page: User already authenticated, redirecting to dashboard'
-      );
       router.replace('/dashboard');
     }
   }, [hasCheckedAuth, isAuthenticated, loading, router]);
 
   // Handle successful login
   useEffect(() => {
-    console.log(
-      'Login page useEffect - isAuthenticated:',
-      isAuthenticated,
-      'user:',
-      user,
-      'loading:',
-      loading
-    );
     // Only redirect if we are authenticated and not loading
     if (isAuthenticated && user && !loading) {
-      console.log('Login page: Login successful, redirecting to dashboard...');
       router.replace('/dashboard');
     }
   }, [isAuthenticated, user, loading, router]);

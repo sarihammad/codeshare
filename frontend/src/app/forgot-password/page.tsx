@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="w-16 h-16 bg-gradient-to-r from-red-500 to-black-500 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            className="w-16 h-16 bg-gradient-to-r from-red-500 to-black rounded-2xl flex items-center justify-center mx-auto mb-4"
           >
             <span className="text-white font-bold text-2xl">🔑</span>
           </motion.div>
@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
 
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-gradient-to-r from-red-500 to-black-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/25 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all duration-300 transform hover:scale-105"
+              className="w-full py-3 px-4 bg-gradient-to-r from-red-500 to-black text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/25 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all duration-300 transform hover:scale-105"
             >
               Send Reset Link
             </button>

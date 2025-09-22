@@ -45,7 +45,14 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:86400000}
+  expiration: ${JWT_EXPIRATION:1800000}  # 30 minutes
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 days
+
+security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://localhost:3000}
+  ws:
+    allowed-origins: ${WS_ALLOWED_ORIGINS:http://localhost:3000,https://localhost:3000}
 
 management:
   endpoints:

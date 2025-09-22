@@ -22,11 +22,15 @@ public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final RateLimitFilter rateLimitFilter;
+  private final SecurityHeadersFilter securityHeadersFilter;
 
   public SecurityConfig(
-      JwtAuthenticationFilter jwtAuthenticationFilter, RateLimitFilter rateLimitFilter) {
+      JwtAuthenticationFilter jwtAuthenticationFilter,
+      RateLimitFilter rateLimitFilter,
+      SecurityHeadersFilter securityHeadersFilter) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     this.rateLimitFilter = rateLimitFilter;
+    this.securityHeadersFilter = securityHeadersFilter;
   }
 
   @Bean
@@ -42,13 +46,34 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    // Use environment variable for allowed origins
-    String frontendOrigin =
-        System.getenv().getOrDefault("FRONTEND_ORIGIN", "http://localhost:3000");
-    configuration.setAllowedOrigins(Arrays.asList(frontendOrigin));
+
+    // Get allowed origins from environment variable
+    String allowedOriginsStr =
+        System.getenv()
+            .getOrDefault("CORS_ALLOWED_ORIGINS", "http://localhost:3000,https://localhost:3000");
+    configuration.setAllowedOrigins(Arrays.asList(allowedOriginsStr.split(",")));
+
+    // Only allow necessary methods
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+
+    // Only allow necessary headers
+    configuration.setAllowedHeaders(
+        Arrays.asList(
+            "Authorization",
+            "Content-Type",
+            "X-Requested-With",
+            "Accept",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"));
+
+    // Expose only necessary headers
+    configuration.setExposedHeaders(
+        Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
+
     configuration.setAllowCredentials(true);
+    configuration.setMaxAge(3600L); // Cache preflight for 1 hour
+
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;
@@ -70,6 +95,7 @@ public class SecurityConfig {
                     .authenticated())
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    http.addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class);
     http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
     http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
