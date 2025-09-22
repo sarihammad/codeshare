@@ -112,7 +112,7 @@ const EditorPage: React.FC = () => {
   return (
     <ProtectedRoute>
       <SkipToEditor roomId={roomId} />
-      <CommandPalette 
+      <CommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
         onSave={handleSaveSnapshot}

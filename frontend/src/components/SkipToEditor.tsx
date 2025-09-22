@@ -7,7 +7,7 @@ interface SkipToEditorProps {
 
 export default function SkipToEditor({ roomId }: SkipToEditorProps) {
   const href = roomId ? `/editor/${roomId}` : '/dashboard';
-  
+
   return (
     <Link
       href={href}

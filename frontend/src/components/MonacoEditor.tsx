@@ -60,36 +60,39 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   }, [roomId]);
 
   // Auto-save function with better error handling and save state
-  const saveContent = useCallback(async (content: string) => {
-    if (!roomId || !content) return;
+  const saveContent = useCallback(
+    async (content: string) => {
+      if (!roomId || !content) return;
 
-    try {
-      setSaveState('saving');
-      const res = await apiCall(API_ENDPOINTS.ROOMS.SNAPSHOT(roomId), {
-        method: 'POST',
-        body: JSON.stringify({ content }),
-      });
+      try {
+        setSaveState('saving');
+        const res = await apiCall(API_ENDPOINTS.ROOMS.SNAPSHOT(roomId), {
+          method: 'POST',
+          body: JSON.stringify({ content }),
+        });
 
-      if (!res.ok) {
-        throw new Error(`Failed to save content, status: ${res.status}`);
+        if (!res.ok) {
+          throw new Error(`Failed to save content, status: ${res.status}`);
+        }
+
+        setSaveState('saved');
+        addToast('Content saved successfully', 'success', 2000);
+        // Reset to idle after 2 seconds
+        setTimeout(() => setSaveState('idle'), 2000);
+      } catch (error) {
+        notifyError(error as Error);
+        setSaveState('error');
+        addToast(
+          'Failed to save content. Will retry automatically.',
+          'error',
+          5000
+        );
+        // Reset to idle after 5 seconds on error
+        setTimeout(() => setSaveState('idle'), 5000);
       }
-
-      setSaveState('saved');
-      addToast('Content saved successfully', 'success', 2000);
-      // Reset to idle after 2 seconds
-      setTimeout(() => setSaveState('idle'), 2000);
-    } catch (error) {
-      notifyError(error as Error);
-      setSaveState('error');
-      addToast(
-        'Failed to save content. Will retry automatically.',
-        'error',
-        5000
-      );
-      // Reset to idle after 5 seconds on error
-      setTimeout(() => setSaveState('idle'), 5000);
-    }
-  }, [roomId, addToast]);
+    },
+    [roomId, addToast]
+  );
 
   // Manual save function for keyboard shortcut
   const forceSave = async () => {
@@ -192,7 +195,14 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
         awarenessRef.current = null;
       }
     };
-  }, [roomId, userId, onAwarenessUpdate, initialContent, saveContent, addToast]);
+  }, [
+    roomId,
+    userId,
+    onAwarenessUpdate,
+    initialContent,
+    saveContent,
+    addToast,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => {

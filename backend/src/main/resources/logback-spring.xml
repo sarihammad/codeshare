@@ -1,29 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    
-    <!-- Console appender for local development -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-    
-    <!-- JSON appender for production -->
-    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <timestamp/>
-                <logLevel/>
-                <loggerName/>
-                <message/>
-                <mdc/>
-                <stackTrace/>
-            </providers>
-        </encoder>
-    </appender>
-    
-    <!-- File appender for production -->
+    <springProfile name="!local">
+        <!-- JSON logging for non-local environments -->
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <logLevel/>
+                    <loggerName/>
+                    <message/>
+                    <mdc/>
+                    <stackTrace/>
+                    <pattern>
+                        <pattern>
+                            {
+                                "service": "codeshare-backend",
+                                "environment": "${ENVIRONMENT:-unknown}",
+                                "version": "${APP_VERSION:-unknown}"
+                            }
+                        </pattern>
+                    </pattern>
+                </providers>
+            </encoder>
+        </appender>
+    </springProfile>
+
+    <springProfile name="local">
+        <!-- Human-readable logging for local development -->
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </springProfile>
+
+    <!-- File appender for all environments -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/codeshare.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -32,43 +43,43 @@
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
         </rollingPolicy>
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <timestamp/>
-                <logLevel/>
-                <loggerName/>
-                <message/>
-                <mdc/>
-                <stackTrace/>
-            </providers>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    
-    <!-- Profile-specific configurations -->
-    <springProfile name="!prod">
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-        </root>
-    </springProfile>
-    
-    <springProfile name="prod">
-        <root level="INFO">
-            <appender-ref ref="JSON_CONSOLE"/>
-            <appender-ref ref="FILE"/>
-        </root>
-    </springProfile>
-    
-    <!-- Application-specific loggers -->
-    <logger name="com.codeshare" level="INFO"/>
-    <logger name="org.springframework.security" level="WARN"/>
-    <logger name="org.springframework.web" level="WARN"/>
-    <logger name="org.hibernate" level="WARN"/>
-    <logger name="org.flywaydb" level="INFO"/>
-    
-    <!-- WebSocket specific logging -->
-    <logger name="com.codeshare.websocket" level="DEBUG"/>
-    
-    <!-- Metrics logging -->
-    <logger name="io.micrometer" level="INFO"/>
-</configuration>
 
+    <!-- Async appender for better performance -->
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+        <queueSize>1024</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="ASYNC"/>
+    </root>
+
+    <!-- Application-specific loggers -->
+    <logger name="com.codeshare" level="DEBUG" additivity="false">
+        <appender-ref ref="ASYNC"/>
+    </logger>
+
+    <!-- WebSocket logging -->
+    <logger name="com.codeshare.websocket" level="DEBUG" additivity="false">
+        <appender-ref ref="ASYNC"/>
+    </logger>
+
+    <!-- Security logging -->
+    <logger name="com.codeshare.infrastructure.security" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC"/>
+    </logger>
+
+    <!-- Reduce noise from third-party libraries -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="io.lettuce" level="WARN"/>
+</configuration>

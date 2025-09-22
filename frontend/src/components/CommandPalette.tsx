@@ -17,7 +17,11 @@ interface Command {
   shortcut?: string;
 }
 
-export default function CommandPalette({ isOpen, onClose, onSave }: CommandPaletteProps) {
+export default function CommandPalette({
+  isOpen,
+  onClose,
+  onSave,
+}: CommandPaletteProps) {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,7 +37,7 @@ export default function CommandPalette({ isOpen, onClose, onSave }: CommandPalet
         onSave?.();
         onClose();
       },
-      shortcut: '⌘ + S'
+      shortcut: '⌘ + S',
     },
     {
       id: 'create-room',
@@ -44,7 +48,7 @@ export default function CommandPalette({ isOpen, onClose, onSave }: CommandPalet
         router.push('/create-room');
         onClose();
       },
-      shortcut: 'Alt + 2'
+      shortcut: 'Alt + 2',
     },
     {
       id: 'join-room',
@@ -55,7 +59,7 @@ export default function CommandPalette({ isOpen, onClose, onSave }: CommandPalet
         router.push('/join-room');
         onClose();
       },
-      shortcut: 'Alt + 3'
+      shortcut: 'Alt + 3',
     },
     {
       id: 'dashboard',
@@ -66,13 +70,14 @@ export default function CommandPalette({ isOpen, onClose, onSave }: CommandPalet
         router.push('/dashboard');
         onClose();
       },
-      shortcut: 'Alt + 1'
-    }
+      shortcut: 'Alt + 1',
+    },
   ];
 
-  const filteredCommands = commands.filter(command =>
-    command.title.toLowerCase().includes(query.toLowerCase()) ||
-    command.description.toLowerCase().includes(query.toLowerCase())
+  const filteredCommands = commands.filter(
+    (command) =>
+      command.title.toLowerCase().includes(query.toLowerCase()) ||
+      command.description.toLowerCase().includes(query.toLowerCase())
   );
 
   useEffect(() => {
@@ -91,13 +96,13 @@ export default function CommandPalette({ isOpen, onClose, onSave }: CommandPalet
           break;
         case 'ArrowDown':
           event.preventDefault();
-          setSelectedIndex(prev => 
+          setSelectedIndex((prev) =>
             prev < filteredCommands.length - 1 ? prev + 1 : 0
           );
           break;
         case 'ArrowUp':
           event.preventDefault();
-          setSelectedIndex(prev => 
+          setSelectedIndex((prev) =>
             prev > 0 ? prev - 1 : filteredCommands.length - 1
           );
           break;
@@ -119,11 +124,11 @@ export default function CommandPalette({ isOpen, onClose, onSave }: CommandPalet
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16">
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Command Palette */}
       <div className="relative w-full max-w-2xl mx-4 bg-slate-800 rounded-lg shadow-2xl border border-slate-700">
         {/* Header */}

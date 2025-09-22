@@ -4,9 +4,7 @@ import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,6 +25,9 @@ public class S3Service {
   @Value("${s3.bucket}")
   private String bucket;
 
+  @Value("${s3.encryption:sse-s3}")
+  private String encryptionType;
+
   public S3Service(
       @Value("${s3.region}") String region, @Value("${s3.enabled:false}") boolean enabled) {
     this.s3Enabled = enabled && isS3Configured();
@@ -36,7 +37,11 @@ public class S3Service {
               .withRegion(Regions.fromName(region))
               .withCredentials(new EnvironmentVariableCredentialsProvider())
               .build();
-      logger.info("S3 service initialized successfully");
+
+      // Setup bucket lifecycle policy
+      setupLifecyclePolicy();
+
+      logger.info("S3 service initialized successfully with encryption: {}", encryptionType);
     } else {
       this.s3 = null;
       if (!enabled) {
@@ -61,6 +66,41 @@ public class S3Service {
     }
   }
 
+  private void setupLifecyclePolicy() {
+    try {
+      // Create lifecycle rules for snapshot retention
+      LifecycleConfiguration lifecycleConfig = new LifecycleConfiguration();
+
+      // Rule 1: Transition to IA after 30 days, delete after 1 year
+      LifecycleRule retentionRule =
+          new LifecycleRule()
+              .withId("snapshot-retention-policy")
+              .withFilter(new LifecycleRuleFilter().withPrefix("snapshots/"))
+              .withStatus(LifecycleRule.Enabled)
+              .withTransitions(
+                  new LifecycleTransition()
+                      .withDays(30)
+                      .withStorageClass(StorageClass.StandardInfrequentAccess),
+                  new LifecycleTransition().withDays(365).withStorageClass(StorageClass.Glacier))
+              .withExpirationInDays(1095); // 3 years total retention
+
+      // Rule 2: Delete temporary files after 7 days
+      LifecycleRule tempRule =
+          new LifecycleRule()
+              .withId("temp-files-cleanup")
+              .withFilter(new LifecycleRuleFilter().withPrefix("temp/"))
+              .withStatus(LifecycleRule.Enabled)
+              .withExpirationInDays(7);
+
+      lifecycleConfig.withRules(retentionRule, tempRule);
+      s3.setBucketLifecycleConfiguration(bucket, lifecycleConfig);
+
+      logger.info("S3 lifecycle policy configured successfully");
+    } catch (Exception e) {
+      logger.warn("Failed to setup S3 lifecycle policy: {}", e.getMessage());
+    }
+  }
+
   public void save(String key, String content) {
     if (!s3Enabled) {
       logger.debug("S3 not configured, skipping save for key: {}", key);
@@ -71,6 +111,17 @@ public class S3Service {
       byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
       ObjectMetadata metadata = new ObjectMetadata();
       metadata.setContentLength(bytes.length);
+      metadata.setContentType("application/json");
+      metadata.setContentEncoding("utf-8");
+
+      // Add encryption
+      if ("sse-s3".equals(encryptionType)) {
+        metadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
+      } else if ("sse-kms".equals(encryptionType)) {
+        metadata.setSSEAlgorithm(ObjectMetadata.AWS_KMS_SERVER_SIDE_ENCRYPTION);
+        metadata.setHeader(
+            "x-amz-server-side-encryption-aws-kms-key-id", System.getenv("AWS_KMS_KEY_ID"));
+      }
 
       s3.putObject(bucket, key, new ByteArrayInputStream(bytes), metadata);
       logger.debug("Successfully saved content to S3 with key: {}", key);
@@ -80,8 +131,54 @@ public class S3Service {
     }
   }
 
-  public void uploadSnapshot(String key, String content) {
+  public String uploadSnapshot(String roomId, String content) {
+    if (!s3Enabled) {
+      logger.debug("S3 not configured, skipping snapshot upload for room: {}", roomId);
+      return null;
+    }
+
+    // Generate deterministic key: snapshots/{roomId}/{timestamp}/{hash}
+    String timestamp = Instant.now().toString().substring(0, 19).replace(":", "-");
+    String contentHash = String.valueOf(content.hashCode());
+    String key = String.format("snapshots/%s/%s/%s.json", roomId, timestamp, contentHash);
+
     save(key, content);
+    logger.info("Snapshot uploaded for room {} with key: {}", roomId, key);
+    return key;
+  }
+
+  public String uploadSnapshotWithPolicy(String roomId, String content, SnapshotPolicy policy) {
+    if (!s3Enabled) {
+      logger.debug("S3 not configured, skipping snapshot upload for room: {}", roomId);
+      return null;
+    }
+
+    String key = generateSnapshotKey(roomId, content, policy);
+    save(key, content);
+    logger.info("Snapshot uploaded for room {} with policy {} and key: {}", roomId, policy, key);
+    return key;
+  }
+
+  private String generateSnapshotKey(String roomId, String content, SnapshotPolicy policy) {
+    String timestamp = Instant.now().toString().substring(0, 19).replace(":", "-");
+    String contentHash = String.valueOf(content.hashCode());
+
+    switch (policy) {
+      case HOURLY:
+        return String.format("snapshots/hourly/%s/%s/%s.json", roomId, timestamp, contentHash);
+      case DAILY:
+        return String.format("snapshots/daily/%s/%s/%s.json", roomId, timestamp, contentHash);
+      case MANUAL:
+        return String.format("snapshots/manual/%s/%s/%s.json", roomId, timestamp, contentHash);
+      default:
+        return String.format("snapshots/%s/%s/%s.json", roomId, timestamp, contentHash);
+    }
+  }
+
+  public enum SnapshotPolicy {
+    HOURLY,
+    DAILY,
+    MANUAL
   }
 
   public String getSnapshot(String key) {

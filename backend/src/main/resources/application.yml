@@ -45,14 +45,16 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:1800000}  # 30 minutes
-  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 days
+  expiration: ${JWT_EXPIRATION:1800000} # 30 minutes
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days
 
 security:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://localhost:3000}
   ws:
     allowed-origins: ${WS_ALLOWED_ORIGINS:http://localhost:3000,https://localhost:3000}
+  rate-limit:
+    trust-proxy: ${RATE_LIMIT_TRUST_PROXY:false}
 
 management:
   endpoints:
@@ -77,3 +79,4 @@ s3:
   bucket: ${S3_BUCKET:codeshare-bucket}
   region: ${S3_REGION:us-east-1}
   enabled: ${S3_ENABLED:false}
+  encryption: ${S3_ENCRYPTION:sse-s3}  # sse-s3, sse-kms
