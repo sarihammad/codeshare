@@ -127,7 +127,7 @@ jobs:
           output: 'trivy-results.sarif'
       
       - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-results.sarif'
       
@@ -258,12 +258,12 @@ jobs:
           output: 'frontend-trivy-results.sarif'
       
       - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'backend-trivy-results.sarif'
       
       - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'frontend-trivy-results.sarif'
 
