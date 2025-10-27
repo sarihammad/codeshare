@@ -53,7 +53,7 @@ jobs:
         run: cd backend && ./mvnw test -Dtest="**/*Test" -Dintegration.test=false
       
       - name: Upload frontend coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: frontend-coverage
           path: frontend/coverage/
@@ -103,7 +103,7 @@ jobs:
         run: cd backend && ./mvnw test -Dtest="**/*IntegrationTest"
       
       - name: Upload backend coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: backend-coverage
           path: backend/target/site/jacoco/
@@ -182,7 +182,7 @@ jobs:
         run: docker compose down
       
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: playwright-report
