@@ -1,6 +1,8 @@
 # CodeShare
 
-A real-time collaborative code editor designed for teams and individuals. Enables seamless multi-user editing with live cursor sharing, presence tracking, and room management. Built for performance and scalability, CodeShare supports version history, secure authentication, and a modern developer experience.
+A real-time collaborative code editor designed for teams and individuals. Enables multi-user editing with live cursor sharing, presence tracking, and room management. Built for performance and scalability. 
+
+Supports version history, secure authentication, and a modern developer experience.
 
 ## Architecture
 
